@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Katas</RootNamespace>
+    <AssemblyName>Katas.Practice</AssemblyName>
+    <!-- Skeletons throw NotImplementedException until you implement them. Warnings are NOT errors
+         here: this is a scratchpad for intentionally-incomplete code and your work in progress. -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

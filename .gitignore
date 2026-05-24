@@ -4,6 +4,12 @@ target/
 build/
 out/
 
+# .NET build artifacts
+[Bb]in/
+[Oo]bj/
+TestResults/
+*.user
+
 # IntelliJ IDEA
 .idea/
 *.iml

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Katas</RootNamespace>
+    <AssemblyName>Katas.Solution</AssemblyName>
+    <!-- Reference implementations must be warning-clean. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

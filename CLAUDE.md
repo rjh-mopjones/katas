@@ -70,6 +70,53 @@ Rules that hold across languages:
 
 ---
 
+## C# (`csharp-katas/`)
+
+- **.NET 8 SDK required** (`global.json` pins 8.0.x with `rollForward: latestFeature`).
+- **Four projects** (the two-sided model, since .NET keeps tests in their own project):
+  `solution/` (lib) + `solution.tests/` (xUnit reference suite, the answer key) and
+  `practice/` (lib of blank skeletons) + `practice.tests/` (empty — the learner writes here).
+  ```bash
+  dotnet test solution.tests    # reference suite — green
+  dotnet test practice.tests    # runs the tests YOU write
+  dotnet build                  # whole solution
+  dotnet test practice.tests --filter "FullyQualifiedName~Cache"   # one kata
+  ```
+- **Namespaces:** root `Katas`; per-kata `Katas.<Kata>`. File-scoped namespaces, one public type
+  per file, PascalCase. `solution/` and `practice/` share namespaces but are separate assemblies.
+- **Shared config** lives in `Directory.Build.props` (net8.0, `Nullable enable`, `ImplicitUsings`,
+  and a global `using System.Collections.Concurrent`). The two lib projects set
+  `TreatWarningsAsErrors=true`, so solution/practice code must be **warning-clean** (annotate
+  nullability; add a discard arm to non-exhaustive `switch` expressions).
+- **Tests:** xUnit (`[Fact]`/`[Theory]`, `Method_Should_Behaviour` names). No Moq/FluentAssertions.
+- **Time:** time-dependent types take a `TimeProvider` ctor param (default `TimeProvider.System`);
+  use `GetTimestamp`/`GetElapsedTime` or `Task.Delay(delay, timeProvider, ct)` /
+  `timeProvider.CreateTimer(...)`. Tests use `FakeTimeProvider`
+  (`Microsoft.Extensions.Time.Testing`, the 8.x package) and `fake.Advance(...)` — never real sleeps.
+  Pattern for delayed async: start the op without awaiting, `fake.Advance(...)`, then await.
+- **Skeleton bodies:** `throw new NotImplementedException();`.
+- **Solution XML docs are interview-grade** (`/// <summary>`/`<remarks>` — the *why*, trade-offs,
+  alternatives), matching the depth of e.g. `TokenBucketRateLimiter`, `LockFreeStack`.
+
+### Recipe: add a new C# kata
+
+1. Choose namespace `Katas.<Name>`.
+2. In **`solution/<Name>/`** write the implementation(s) + fixtures with rich XML docs; in
+   **`solution.tests/<Name>/`** write xUnit tests pinning the contract. `dotnet test solution.tests` → green.
+3. Mirror into **`practice/<Name>/`** (no tests): copy fixture/domain types (interfaces, records,
+   enums, exceptions) verbatim; reduce each SUT class to a **bare skeleton** (package + usings +
+   class decl + non-`private` signatures throwing `NotImplementedException`; drop fields, private
+   members, XML docs). Keep a public nested type only if a kept signature needs it.
+4. Add `practice/<Name>/README.md` (problem, requirements, what-you-implement = public contract,
+   the real challenge, run note, a Microsoft Docs link for the feature).
+5. Verify: `dotnet build practice` compiles.
+
+> **Watch out:** a non-generic SUT whose name equals its namespace leaf (e.g. `CircuitBreaker` in
+> `Katas.CircuitBreaker`) collides in test files — alias the type (`using Breaker = …`) since a
+> nested namespace shadows a same-named using-alias.
+
+---
+
 ## Commits
 
 - **Never add `Co-Authored-By` / Claude authorship** to commits.

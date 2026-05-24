@@ -9,6 +9,7 @@ own tests**, and diff against the reference solution when stuck.
 | Language | Directory | Stack | Katas |
 |----------|-----------|-------|-------|
 | Java | [`java-katas/`](java-katas/) | Maven · JDK 21 · JUnit 5 | 18 packages (LLD, concurrency, caching, resilience, rate limiting, async/messaging, lock-free) |
+| C# | [`csharp-katas/`](csharp-katas/) | .NET 8 · xUnit | 23 katas (LINQ/iterators, async streams, channels, records, pattern matching, `Span<T>`, generics/variance, plus classic LLD ports) — focused on **language mastery** |
 
 _More languages will sit alongside as `<lang>-katas/`._
 
