@@ -19,12 +19,9 @@ A backend service needs to cap request throughput per client key. Implement thre
 **Sliding window counter**: approximates the sliding window using two consecutive fixed windows and the formula `prevCount × (1 − elapsed/windowSize) + currCount`. O(1) memory per key. Eliminates the boundary-spike problem of fixed windows.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `TokenBucketRateLimiter` — `tryAcquire(key, n)`: lazy refill + CAS loop
-- `LeakyBucketRateLimiter` — `tryAcquire(key, n)`: lazy drain + CAS loop
-- `SlidingWindowRateLimiter` — `tryAcquire(key, n)`: window aging + weighted estimate + CAS loop
+Implement `TokenBucketRateLimiter`, `LeakyBucketRateLimiter`, and `SlidingWindowRateLimiter` from scratch — the `RateLimiter` public API (`tryAcquire`). You design the internal state and concurrency mechanism yourself.
 
-(The `RateLimiter` interface is provided as scaffolding.)
+(`RateLimiter` is provided as a working fixture.)
 
 ## The real challenge
 - **Compound-state CAS**: both fields of each state record (`tokens`+`lastRefillNanos`, `level`+`lastLeakNanos`, `prevCount`+`currCount`+`windowStart`) must be swapped atomically as one immutable record in an `AtomicReference`. Using two separate `AtomicLong`s would allow a reader to observe a half-updated pair, silently double-refilling or double-draining.

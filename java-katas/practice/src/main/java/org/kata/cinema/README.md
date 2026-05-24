@@ -15,10 +15,9 @@ Users pick seats, pay, and then receive a confirmed booking. Because selection a
 - All operations must be safe under concurrent access from many threads for the same or different screenings.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `ConcurrentSeatBookingService` — `hold`, `confirm`, `release`, and the `sweepExpired` helper
+Implement `ConcurrentSeatBookingService` from scratch — the public API (`hold`, `confirm`, `release`). You design the internal state layout, locking strategy, secondary indexes, and any private helpers yourself.
 
-(`SeatBookingService` interface, `Seat`, `Hold`, `Booking`, `Screening` are provided as scaffolding.)
+(`SeatBookingService` interface, `Seat`, `Hold`, `Booking`, and `Screening` are provided as fully working scaffolding.)
 
 ## The real challenge
 - **Atomic check-and-act.** The conflict check (is any seat taken?) and the seat reservation (mark them held) must happen inside the same critical section. Any gap between check and act is a TOCTOU race that allows double-booking.

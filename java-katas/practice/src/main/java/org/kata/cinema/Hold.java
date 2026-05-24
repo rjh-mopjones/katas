@@ -33,6 +33,6 @@ public record Hold(UUID id, UUID screeningId, Set<Seat> seats, Instant expiresAt
      * matches the usual "TTL elapsed" intuition.
      */
     public boolean isExpired(Instant now) {
-        throw new UnsupportedOperationException("TODO: implement");
+        return !now.isBefore(expiresAt);
     }
 }

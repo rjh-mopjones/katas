@@ -15,11 +15,9 @@ Model a bank of elevators serving a building. Each car runs the LOOK algorithm: 
 - `Request.direction` must be `UP` or `DOWN`; `IDLE` is rejected.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `Elevator` — `addTarget`, `tick`, `chooseInitialDirection` (IDLE → moving), `maybeReverseOrIdle` (mid-trip direction update), `costFor`
-- `ElevatorController` — `call`, `selectFloor`, `tick`
+Implement `Elevator` and `ElevatorController` from scratch — the public API (`addTarget`, `tick`, `costFor`, `id`, `currentFloor`, `direction` on `Elevator`; `call`, `selectFloor`, `tick`, `elevators` on `ElevatorController`). You design the internal fields, LOOK state machine, and any private helpers yourself.
 
-(`Direction` enum and `Request` record are provided as scaffolding.)
+(`Direction` enum and `Request` record are provided as fully working scaffolding.)
 
 ## The real challenge
 - **LOOK vs SCAN.** SCAN always travels to the building's extreme floor before reversing; LOOK only travels as far as the furthest pending request. Real elevators use LOOK. The state machine has two distinct transitions: IDLE-to-moving (`chooseInitialDirection`) and mid-trip direction exhaustion (`maybeReverseOrIdle`). Keep them separate — collapsing them into one branchy method makes each case harder to reason about correctly.

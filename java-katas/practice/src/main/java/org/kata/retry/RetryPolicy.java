@@ -61,13 +61,7 @@ public record RetryPolicy(
         return new RetryPolicy(1, 0, 0, 1.0, false);
     }
 
-    /**
-     * Compute the delay (before optional jitter) for a given attempt number.
-     *
-     * @param attempt 1-based attempt index (1 = after first failure, 2 = after second, …).
-     * @return capped delay in milliseconds.
-     */
     public long computeDelayMs(int attempt) {
-        throw new UnsupportedOperationException("TODO: implement");
+        throw new UnsupportedOperationException();
     }
 }

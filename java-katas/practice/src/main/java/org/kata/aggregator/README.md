@@ -13,8 +13,7 @@ Build a `ScatterGather` class that accepts an injected `Executor` and a list of 
 - Both methods reject null `tasks` arguments; `gatherAllWithTimeout` also rejects null, zero, or negative timeouts.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `ScatterGather` — `gatherAll(List<Supplier<T>>)` and `gatherAllWithTimeout(List<Supplier<T>>, Duration)`
+Implement `ScatterGather` from scratch — the public API is a no-arg constructor, a constructor accepting an `Executor`, `gatherAll(List<Supplier<T>>)`, and `gatherAllWithTimeout(List<Supplier<T>>, Duration)`. You design the scatter, barrier, and gather logic yourself.
 
 ## The real challenge
 - **`allOf` returns `Void`**: `CompletableFuture.allOf(...)` gives you a barrier that fires when all futures complete, but it holds no results. You must keep a reference to the original individual futures and collect their results after the barrier — a common interview stumbling block.

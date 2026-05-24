@@ -23,12 +23,7 @@ Build three lock-free data structures without using `synchronized`, `ReentrantLo
 - Every successful push or pop must increment the monotonic stamp so that ABA is detectable — a stale CAS whose reference matches but whose stamp does not must fail and retry.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `TreiberStack` — `push(E)` and `pop()`
-- `MichaelScottQueue` — `enqueue(E)` and `dequeue()`
-- `AtomicStampedStack` — `push(E)` and `pop()`
-
-(The nested `Node` types, atomic fields `head`/`tail`, and `isEmpty()` are provided as scaffolding.)
+Implement `TreiberStack`, `MichaelScottQueue`, and `AtomicStampedStack` from scratch — the public API is `push`/`pop`/`isEmpty` for the stacks and `enqueue`/`dequeue`/`isEmpty` for the queue (all returning `Optional<E>` on removal). You design the node structure, atomic reference fields, and all CAS loops yourself.
 
 ## The real challenge
 - **CAS-loop skeleton**: every mutating operation follows the same three steps — (1) volatile-read a snapshot, (2) compute the proposed next state (pure, no side-effects), (3) `compareAndSet` and return on success or retry on failure. Getting step (2) right — building a new node from a snapshot before the CAS — is the key insight.

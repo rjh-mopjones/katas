@@ -15,10 +15,7 @@ Implement a generic pool that manages a fixed maximum number of reusable resourc
 - Constructors: one with factory + maxSize (always-valid), one with factory + maxSize + validator.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `ConnectionPool` — `borrow(long, TimeUnit)` and `release(R)`
-
-(The `Semaphore`, `ConcurrentLinkedQueue<R> idle`, `AtomicInteger totalCreated`, `available()`, and `inUse()` are provided as scaffolding.)
+Implement `ConnectionPool<R>` from scratch — the public API is two constructors (`factory + maxSize`, and `factory + maxSize + validator`), `borrow(long, TimeUnit)`, `release(R)`, `available()`, and `inUse()`. You design the internal resource tracking, bounding mechanism, and validation loop yourself.
 
 ## The real challenge
 - **Semaphore as the bound**: the semaphore models "slots available" cleanly — `tryAcquire(timeout, unit)` blocks until a slot opens or the deadline elapses. Without it, you would have to manually count in-flight borrows and coordinate that count with the idle queue.

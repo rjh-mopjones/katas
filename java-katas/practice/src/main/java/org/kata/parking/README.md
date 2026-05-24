@@ -14,10 +14,9 @@ Model a multi-type parking lot containing compact, standard, EV-charging, and tr
 - `BigDecimal` pricing at a flat hourly rate; use banker's rounding (`HALF_EVEN`) on the final amount.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `ConcurrentParkingLot` — `park`, `unpark`, `available`
+Implement `ConcurrentParkingLot` from scratch — the public API (`park`, `unpark`, `available`). You design the internal fields, per-spot locking strategy, occupancy tracking, and billing arithmetic yourself.
 
-(`ParkingLot` interface, `Spot` sealed hierarchy (`CompactSpot`, `StandardSpot`, `EVSpot`, `TruckSpot`), `Vehicle`, `VehicleType`, `Ticket` are provided as scaffolding.)
+(`ParkingLot` interface, `Spot` sealed hierarchy (`CompactSpot`, `StandardSpot`, `EVSpot`, `TruckSpot`), `Vehicle`, `VehicleType`, and `Ticket` are provided as fully working scaffolding.)
 
 ## The real challenge
 - **Sealed spot hierarchy, not inheritance.** The instinctive design — `EVSpot extends StandardSpot` — violates the Liskov Substitution Principle: `EVSpot.fits` strengthens the precondition (rejects `CAR`) relative to `StandardSpot.fits`, so an `EVSpot` cannot substitute for a `StandardSpot`. Model the four spot types as sealed interface siblings instead — each answers its own `fits` predicate independently, and the compiler enforces exhaustive `switch` when you pattern-match.

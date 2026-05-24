@@ -13,10 +13,7 @@ Implement a processor that wraps arbitrary `Supplier<T>` actions so that each un
 - Null `idempotencyKey` or `action` arguments are rejected.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `IdempotentProcessor` — `process(String, Supplier<T>)`
-
-(The `ConcurrentHashMap<String, Object> cache` and `isProcessed` are provided as scaffolding.)
+Implement `IdempotentProcessor` from scratch — the public API is `process(String idempotencyKey, Supplier<T> action)` and `isProcessed(String idempotencyKey)`. You design the cache structure and the atomic exactly-once guarantee yourself.
 
 ## The real challenge
 - **`computeIfAbsent` is the only correct primitive**: the naive approach — `if (cache.containsKey(key)) return cache.get(key); else cache.put(key, action.get())` — has a TOCTOU (time-of-check/time-of-use) race: two threads can both pass the `containsKey` check before either executes the action, causing it to run twice. `ConcurrentHashMap.computeIfAbsent` atomically checks and conditionally inserts, holding an internal bin lock so the mapping function runs at most once per absent key.

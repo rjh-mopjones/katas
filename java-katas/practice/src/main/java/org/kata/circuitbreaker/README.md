@@ -15,10 +15,7 @@ Services that depend on a downstream system (database, external API) must stop h
 - `state()` returns the current state (refreshing any pending `OPEN → HALF_OPEN` transition before returning).
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `CircuitBreaker` — `call`, `state`, and the private helpers `maybeTransitionToHalfOpen`, `recordSuccess`, `recordFailure`, `tripOpen`
-
-(`CircuitOpenException` and the `State` enum are provided as scaffolding.)
+Implement `CircuitBreaker` from scratch — the public API is `state()`, `call(Callable<T>)`, and two constructors (with and without an injectable `LongSupplier` clock). You design the internal state machine, locking strategy, and all transitions yourself. `CircuitOpenException` (the exception thrown when the breaker is OPEN) and the `State` enum (`CLOSED`, `OPEN`, `HALF_OPEN`) are provided as fully working types.
 
 ## The real challenge
 - **Lock scope**: acquire the lock to check state and decide whether to invoke the action; release before calling the action; re-acquire to record the outcome. Holding the lock during the action would serialise all concurrent calls and eliminate the concurrency benefit.

@@ -12,13 +12,10 @@ public record TimeSlot(LocalDateTime startTime, Duration duration) {
     }
 
     public boolean overlaps(TimeSlot other) {
-        throw new UnsupportedOperationException("TODO: implement");
+        throw new UnsupportedOperationException();
     }
 
-    // Package-private: derived value. Callers should ask overlaps() rather than
-    // computing against end-times directly. Promote to public only if a legitimate
-    // out-of-package caller needs it.
     LocalDateTime end() {
-        throw new UnsupportedOperationException("TODO: implement");
+        return startTime.plus(duration);
     }
 }

@@ -15,10 +15,7 @@ Implement an in-process event bus where subscribers register interest in a speci
 - Null `type`, `handler`, and `event` arguments are rejected.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `EventBus` — `subscribe(Class<T>, Consumer<T>)` and `publish(Object)`
-
-(The `Subscription` interface and the `HandlerEntry` record are provided as scaffolding.)
+Implement `EventBus` from scratch — the public API is `subscribe(Class<T>, Consumer<T>)` (returns a `Subscription`) and `publish(Object)`. You design the internal handler registry, unsubscribe mechanism, and concurrent iteration strategy yourself. The `Subscription` interface (with its single `unsubscribe()` method) is provided as a working type.
 
 ## The real challenge
 - **`CopyOnWriteArrayList` for safe concurrent iteration**: `publish` iterates the handler list while `subscribe`/`unsubscribe` may mutate it concurrently. `CopyOnWriteArrayList` takes a snapshot of the backing array at iteration start, so modifications during publish are never visible to that iteration — no lock needed during delivery.

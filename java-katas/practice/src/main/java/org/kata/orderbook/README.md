@@ -16,10 +16,9 @@ Implement a limit order book for a single trading symbol. Incoming orders are ma
 - All operations are serialised on a single lock (the matching loop is inherently sequential).
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `OrderBook` — `submit` (match then rest residual), `cancel`, `bestBid`, `bestAsk`, the private `match` loop, and the private `rest` helper
+Implement `OrderBook` from scratch — the public API (`submit`, `cancel`, `bestBid`, `bestAsk`). You design the internal data structures (bid/ask books, price-level queues, id index), the matching loop, the rest helper, and the locking strategy yourself.
 
-(`Order`, `Trade`, `Side` are provided as scaffolding.)
+(`Order` record, `Trade` record, and `Side` enum are provided as fully working scaffolding.)
 
 ## The real challenge
 - **Data structure choices.** Bids use a reverse-ordered `TreeMap` so `firstEntry()` is always the best (highest) bid. Asks use natural-order `TreeMap` so `firstEntry()` is always the best (lowest) ask. Each price level holds an `ArrayDeque<Order>` — `peek`/`poll` at the head give FIFO in O(1), and de-duplication of price levels is automatic.

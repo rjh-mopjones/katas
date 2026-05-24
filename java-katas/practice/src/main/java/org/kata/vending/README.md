@@ -15,10 +15,9 @@ A vending machine holds a catalogue of products with prices, a limited stock cou
 - All public methods are `synchronized` — the machine serves one user at a time.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `VendingMachine` — `insertCoin`, `select`, `refund`, and the private `planGreedyChange` and `resetSession` helpers
+Implement `VendingMachine` from scratch — the public API is `restock`, `loadCoins`, `insertCoin`, `select`, and `refund`. You design the internal state and any helper methods yourself.
 
-(The `Coin` enum, `Product` record, and `DispenseResult` sealed interface are provided as scaffolding.)
+(`Coin`, `Product`, and `DispenseResult` are provided as working fixtures.)
 
 ## The real challenge
 - **Plan-then-commit**: `select` must compute the full change plan against a projected copy of the coin inventory and only mutate real state if the plan succeeds. If `planGreedyChange` returns `null`, the method must refund and return without touching stock or the float.

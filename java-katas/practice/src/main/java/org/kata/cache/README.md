@@ -16,12 +16,9 @@ Build two bounded in-memory caches — one with a Least Recently Used eviction p
 - `ConcurrentLruCache` must be safe for concurrent `get` and `put` from multiple threads.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `LruCache` — `get`, `put`, `size`, `clear`, and the private helpers `moveToFront`, `unlink`, `insertAtFront`, `evictLru`
-- `LfuCache` — `get`, `put`, `size`, `clear`, and the private helpers `promoteKey`, `evictLfu`
-- `ConcurrentLruCache` — `get`, `put`, `size`, `clear` (delegate to `LruCache` under a `ReentrantLock`)
+Implement `LruCache`, `LfuCache`, and `ConcurrentLruCache` from scratch — the `Cache` public API (`get`, `put`, `size`, `clear`). You design the internal data structures yourself.
 
-(The `Cache` interface is provided as scaffolding.)
+(`Cache` is provided as a working fixture.)
 
 ## The real challenge
 - **LRU in O(1)**: requires a `HashMap<K, Node>` combined with an intrusive doubly-linked list. The map provides O(1) lookup directly to the list node; the doubly-linked list provides O(1) unlink from any interior position. A singly-linked list cannot unlink an arbitrary node in O(1). Sentinel head/tail nodes eliminate null-pointer edge cases at the boundaries.

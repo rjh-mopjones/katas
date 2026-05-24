@@ -13,11 +13,9 @@ Model a simple bank with accounts that support deposits, withdrawals, and transf
 - `ConcurrentAccountService` must be safe under high thread contention: concurrent deposits, withdrawals, and transfers across many accounts produce no lost updates, no negative balances, and no deadlocks.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `InMemoryAccountService` — `open`, `find`, `deposit`, `withdraw`, `transfer`
-- `ConcurrentAccountService` — same five methods, wrapped in per-account `ReentrantLock`s with deadlock-safe ordering
+Implement `InMemoryAccountService` and `ConcurrentAccountService` from scratch — the public API (`open`, `find`, `deposit`, `withdraw`, `transfer`). You design the internal data structures, field declarations, and helper methods yourself.
 
-(`Account`, `AccountService` interface are provided as scaffolding.)
+(`Account` record and `AccountService` interface are provided as fully working scaffolding.)
 
 ## The real challenge
 - **Deadlock-free transfer via monotonic lock ordering.** Acquiring two locks for a transfer is unavoidable; the order must be globally consistent regardless of direction. Canonicalise by comparing `UUID`s: always lock `min(from, to)` first, then `max(from, to)`. This eliminates the cycle in the lock-acquisition graph that causes deadlock.

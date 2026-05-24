@@ -15,11 +15,7 @@ Implement a `TaskScheduler` that accepts one-shot `Runnable` tasks with a delay 
 - If a task action throws, the exception is swallowed so the worker continues draining the queue.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `TaskScheduler` — `start()`, `schedule(Runnable, long, TimeUnit)`, `close()`, and the private `workerLoop()`
-- `ScheduledTask` (inner class) — `getDelay(TimeUnit)` and `compareTo(Delayed)` (the `cancel()` / `isCancelled()` flag is provided)
-
-(The `DelayQueue<ScheduledTask> queue` and the `ScheduledTask` fields `action`, `dueNanos`, and `cancelled` are provided as scaffolding.)
+Implement `TaskScheduler` from scratch — the public API is `start()`, `schedule(Runnable, long, TimeUnit)` (returns a `ScheduledTask`), and `close()`. You also implement the inner `ScheduledTask` type with `cancel()`, `isCancelled()`, `getDelay(TimeUnit)`, and `compareTo(Delayed)`. You design the worker thread, `DelayQueue` usage, and shutdown logic yourself.
 
 ## The real challenge
 - **`DelayQueue.take()` as a zero-CPU wait**: `take()` parks the worker thread until the head element's `getDelay()` returns ≤ 0. This is categorically different from a `Thread.sleep` loop — the OS wakes the thread at exactly the right time. A newly added task with a sooner due time causes the queue to unpark the waiting thread so it can re-examine the new head.

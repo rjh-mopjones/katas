@@ -16,11 +16,11 @@ Network calls and service requests fail transiently. Build a `Retryer` that exec
 - `RetryPolicy.computeDelayMs(attempt)` is the method you implement on the record.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `RetryPolicy` — `computeDelayMs(int attempt)`: exponential formula capped at `maxDelayMs`
-- `Retryer` — `execute(Callable<T> action)`: retry loop with delay, jitter, and final re-throw
+Implement `Retryer` from scratch — the public API is two constructors and `execute(Callable<T>)`. You design the internal fields and retry logic yourself.
 
-(The `RetryPolicy` record fields, compact constructor validation, and `noRetry()` factory are provided as scaffolding.)
+Also implement `RetryPolicy.computeDelayMs(int attempt)` — the record components, compact constructor validation, and `noRetry()` factory are provided and working.
+
+(`RetryPolicy` record structure is provided as a working fixture.)
 
 ## The real challenge
 - **Thundering-herd reasoning**: without jitter, all callers that fail at the same instant retry at the same instants, turning a transient outage into a sustained overload spike. Full jitter (`random(0, delay)`) maximally spreads retries across the delay window. Be able to explain this trade-off and name the three jitter strategies (full, equal, decorrelated).

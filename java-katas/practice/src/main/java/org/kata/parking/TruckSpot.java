@@ -9,6 +9,6 @@ package org.kata.parking;
  * smaller fitting spot is free (or the vehicle is a truck and nothing else fits).
  */
 public record TruckSpot(int id) implements Spot {
-    public boolean fits(Vehicle v) { throw new UnsupportedOperationException("TODO: implement"); }   // truck-sized fits anything
-    public int sizeRank() { throw new UnsupportedOperationException("TODO: implement"); }
+    public boolean fits(Vehicle v) { return true; }   // truck-sized fits anything
+    public int sizeRank() { return 3; }
 }

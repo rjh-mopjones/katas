@@ -14,10 +14,7 @@ Build a generic, fixed-capacity blocking queue backed by a circular array. Produ
 - Null elements are rejected; a null slot in the buffer must be cleared after take (GC hygiene).
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `BoundedBlockingQueue` — `put(E)`, `take()`, and `size()`
-
-(The `ReentrantLock`, both `Condition` fields, the circular-array buffer, and the `capacity()` method are provided as scaffolding.)
+Implement `BoundedBlockingQueue<E>` from scratch — the public API is the constructor `BoundedBlockingQueue(int capacity)`, `put(E)`, `take()`, `size()`, and `capacity()`. You design the backing data structure, locking strategy, and blocking/waking logic yourself.
 
 ## The real challenge
 - **One lock, two conditions**: you must use `notFull` and `notEmpty` as separate conditions derived from the same lock. With a single shared condition you would have to call `signalAll()` (wasting work); two conditions let you call `signal()` on exactly the right waiters — one item added means exactly one consumer can proceed.

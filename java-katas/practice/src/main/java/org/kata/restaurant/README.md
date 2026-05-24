@@ -15,12 +15,11 @@ A restaurant has a fixed set of tables, each with a capacity. Guests call in to 
 - Per-table locking: concurrent bookings on different tables must not contend with each other.
 
 ## What you implement
-The signatures, fields, constructors, and Javadoc are already in place — fill in the logic for:
-- `TimeSlot` — `overlaps(TimeSlot)` and the package-private `end()` helper
-- `InMemoryBookingService` — `book`, `cancel`, `bookingsFor`, and the private `isFree` helper
-- `ConcurrentBookingService` — same three public methods, using per-table `ReentrantLock`s and `ConcurrentHashMap`
+Implement `InMemoryBookingService` and `ConcurrentBookingService` from scratch — both expose the `BookingService` public API (`book`, `cancel`, `bookingsFor`). You design the internal data structures yourself.
 
-(Records `Booking`, `Table` and the interface `BookingService` are provided as scaffolding.)
+Also implement `TimeSlot.overlaps(TimeSlot)` — the `end()` helper and record components are provided and working.
+
+(`Booking`, `Table`, and `BookingService` are provided as working fixtures.)
 
 ## The real challenge
 - **Overlap logic**: the predicate `start < other.end && other.start < end` (strict inequalities) is a precise half-open interval test — adjacent slots must not be treated as overlapping.

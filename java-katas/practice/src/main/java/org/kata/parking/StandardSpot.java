@@ -12,7 +12,7 @@ package org.kata.parking;
  */
 public record StandardSpot(int id) implements Spot {
     public boolean fits(Vehicle v) {
-        throw new UnsupportedOperationException("TODO: implement");
+        return v.type() == VehicleType.CAR || v.type() == VehicleType.EV;
     }
-    public int sizeRank() { throw new UnsupportedOperationException("TODO: implement"); }
+    public int sizeRank() { return 2; }
 }
