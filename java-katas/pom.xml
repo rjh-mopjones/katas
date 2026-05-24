@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.kata</groupId>
+    <artifactId>katas-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <!--
+      Two modules with identical structure and tests:
+        solution/ — full reference implementations. `mvn -pl solution test` stays green.
+        practice/ — same signatures + tests, but logic-class method bodies are blanked to
+                    `throw new UnsupportedOperationException("TODO")`. Tests are RED until you
+                    implement them. Open the same file under solution/ to peek when stuck.
+
+      Common workflow:
+        mvn -pl practice test        # work here — RED until you implement
+        mvn -pl solution test        # the reference (always green)
+        mvn test                     # both (practice will fail by design — that's expected)
+    -->
+    <modules>
+        <module>solution</module>
+        <module>practice</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.11.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
