@@ -26,9 +26,16 @@ Implement `Elevator` and `ElevatorController` from scratch — the public API (`
 - **De-duplication.** Adding the same target twice must not cause the car to stop twice. `TreeSet` handles this naturally.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/elevator/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=ElevatorControllerTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/elevator/`

@@ -34,9 +34,16 @@ Implement `TreiberStack`, `MichaelScottQueue`, and `AtomicStampedStack` from scr
 - **Immutable nodes**: `Node.next` (in Treiber and AtomicStamped) and `Node.item` must be `final`. Immutability is not style — it is what makes reading `node.next` safe without a lock after the node is installed via CAS.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/lockfree/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=TreiberStackTest,MichaelScottQueueTest,AtomicStampedStackTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/lockfree/`

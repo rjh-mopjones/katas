@@ -27,9 +27,16 @@ Implement `LruCache`, `LfuCache`, and `ConcurrentLruCache` from scratch — the 
 - **`LinkedHashSet` for LFU tie-breaking**: insertion order within a frequency bucket gives LRU tie-breaking for free. A plain `HashSet` would make tie-breaking arbitrary; a `TreeSet` would add O(log n) cost.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/cache/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=LruCacheTest,LfuCacheTest,ConcurrentLruCacheTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/cache/`

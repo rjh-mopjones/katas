@@ -25,9 +25,16 @@ Implement `TaskScheduler` from scratch — the public API is `start()`, `schedul
 - **Cancellation check after take**: the worker must check `task.isCancelled()` after `take()` returns and skip the action if cancelled. Cancelled tasks evaporate — they are never re-queued.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/scheduler/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=TaskSchedulerTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/scheduler/`

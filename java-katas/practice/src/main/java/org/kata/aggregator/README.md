@@ -22,9 +22,16 @@ Implement `ScatterGather` from scratch — the public API is a no-arg constructo
 - **Executor injection**: tests inject a controlled executor to verify parallelism and lifecycle. The production default of virtual threads requires no pool sizing.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/aggregator/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=ScatterGatherTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/aggregator/`

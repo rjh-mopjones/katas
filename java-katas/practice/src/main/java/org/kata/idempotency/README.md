@@ -21,9 +21,16 @@ Implement `IdempotentProcessor` from scratch — the public API is `process(Stri
 - **Scope of the guarantee**: this is an in-process guarantee only. Distributed exactly-once requires an external shared store (Redis `SET NX EX`, a DB unique index) and the write must be durable before acknowledging the message to the broker.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/idempotency/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=IdempotentProcessorTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/idempotency/`

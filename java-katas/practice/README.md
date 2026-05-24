@@ -1,28 +1,38 @@
 # Practice
 
-Implement the katas here. Every file already has its **package, imports, Javadoc, field
-declarations, constructors, and method signatures** — only the logic-method bodies are blanked to:
+This module ships two things and nothing more:
 
-```java
-throw new UnsupportedOperationException("TODO: implement");
-```
+1. **Blank SUT skeletons** — every file has its package, imports, Javadoc, field declarations,
+   constructors, and method signatures; only the logic bodies are blanked to:
+   ```java
+   throw new UnsupportedOperationException("TODO: implement");
+   ```
+2. **Per-kata READMEs** — problem statement, requirements, and hints, one per package under
+   `src/main/java/org/kata/<pkg>/README.md`.
 
-The tests under `practice/src/test` are identical to the solution's. They are **RED** until you
-implement the method. Make them green.
+There are **no tests provided here**. Writing the tests is part of the exercise.
 
 ## Workflow
 
 ```bash
 # JDK 21 is required (the default `mvn` JDK may be older — see ../README.md)
 export JAVA_HOME=$(/usr/libexec/java_home -v 21)
-
-# Work on practice (run from repo root)
-mvn -pl practice test                          # all practice tests (RED until you implement)
-mvn -pl practice test -Dtest=LruCacheTest      # one kata at a time
-
-# The reference, always green
-mvn -pl solution test
 ```
+
+For each kata:
+
+1. **Read** the kata README (`src/main/java/org/kata/<pkg>/README.md`) for the problem statement
+   and requirements.
+2. **Implement** the class(es) from scratch — fill in the `TODO` method bodies.
+3. **Write your own tests** under `src/test/java/org/kata/<pkg>/` to drive and verify your
+   implementation.
+4. **Run** your tests:
+   ```bash
+   mvn -pl practice test
+   ```
+
+When you want to compare or get unstuck, the `solution/` twin holds the full implementation
+**and** the reference tests — peek at either after you have made your own attempt.
 
 ## Side-by-side with the solution
 
@@ -31,10 +41,11 @@ Every practice file has a twin at the **same relative path** under `../solution/
 ```
 practice/src/main/java/org/kata/cache/LruCache.java   <- you implement
 solution/src/main/java/org/kata/cache/LruCache.java   <- the worked solution
+solution/src/test/java/org/kata/cache/               <- the reference tests
 ```
 
-Open both in a split editor (IntelliJ: right-click a tab → *Split Right*) to glance at the
-solution when stuck. Or diff them:
+Open the implementation twins in a split editor (IntelliJ: right-click a tab → *Split Right*) to
+glance at the solution when stuck. Or diff them:
 
 ```bash
 diff practice/src/main/java/org/kata/cache/LruCache.java \

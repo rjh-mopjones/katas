@@ -8,8 +8,8 @@ katas/
 ├── pom.xml              # parent (aggregates both modules)
 ├── solution/            # full reference implementations + tests  (always green)
 │   └── src/{main,test}/java/org/kata/...
-└── practice/            # same structure + same tests, logic bodies blanked to TODO  (RED)
-    └── src/{main,test}/java/org/kata/...
+└── practice/            # blank SUT skeletons + per-kata READMEs — no tests provided
+    └── src/main/java/org/kata/...
 ```
 
 Same relative path in both modules → open the twins in a split editor to work side-by-side.
@@ -23,9 +23,9 @@ Requires **JDK 21+** (the POM targets `release 21`). If your default `mvn` uses 
 ```bash
 export JAVA_HOME=$(/usr/libexec/java_home -v 21)
 
-mvn -pl solution test    # reference — green
-mvn -pl practice test    # your work — RED until implemented
-mvn test                 # both (practice fails by design)
+mvn -pl solution test    # reference suite — green
+mvn -pl practice test    # runs the tests you write under practice/src/test
+mvn test                 # everything
 ```
 
 ## Katas

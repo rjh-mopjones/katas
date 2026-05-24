@@ -30,9 +30,16 @@ Also implement `RetryPolicy.computeDelayMs(int attempt)` — the record componen
 - **Injectable sleeper**: `Thread.sleep` in production; a `List`-collecting `LongConsumer` in tests. This lets tests assert the exact delay sequence without the test suite taking real wall-clock time.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/retry/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=RetryerTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/retry/`

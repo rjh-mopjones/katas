@@ -25,9 +25,16 @@ Implement `CircuitBreaker` from scratch — the public API is `state()`, `call(C
 - **Consecutive count vs rolling window**: this implementation counts consecutive failures (one success resets the counter). A rolling failure-rate window (e.g., Resilience4j's sliding window) is more nuanced but more complex — know the trade-off.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/circuitbreaker/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=CircuitBreakerTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/circuitbreaker/`

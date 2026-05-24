@@ -28,9 +28,16 @@ Implement `OrderBook` from scratch — the public API (`submit`, `cancel`, `best
 - **`BigDecimal` for prices.** Binary float rounding in a matching engine accumulates into real P&L errors. Always use `BigDecimal` and `compareTo`, never `==` or `double` arithmetic.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/orderbook/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=OrderBookTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/orderbook/`

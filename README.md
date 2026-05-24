@@ -1,8 +1,8 @@
 # Katas
 
-Coding katas for interview prep, organised by language. Every kata ships **twice**: a worked
-**solution** and a blank **practice** skeleton driven by the *same tests* — so you implement from
-scratch and verify yourself, then diff against the reference when stuck.
+Coding katas for interview prep, organised by language. Every kata has a worked **solution** and a
+blank **practice** skeleton. You implement from scratch against the problem statement, **write your
+own tests**, and diff against the reference solution when stuck.
 
 ## Languages
 
@@ -14,23 +14,27 @@ _More languages will sit alongside as `<lang>-katas/`._
 
 ## How each language is organised
 
-Two parallel trees with identical structure:
+Two parallel trees with identical package structure:
 
 ```
 <lang>-katas/
-├── solution/     full reference implementations + tests  (always GREEN)
-└── practice/     same structure + same tests, but the classes you implement are blank  (RED)
+├── solution/     full reference implementations + tests  (the answer key — always GREEN)
+└── practice/     same packages, but the classes you implement are blank skeletons; NO tests
 ```
 
-- **The tests are the spec.** Make them pass.
-- **Each kata has a README** stating the problem, requirements, and the real challenge.
-- Same relative path in both trees → open the twins side-by-side; the `solution/` copy is the
-  answer key.
+- **Start from the README.** Each kata package has a README stating the problem, requirements, and
+  the real challenge.
+- **Write your own tests.** The practice side intentionally ships *without* tests — driving your
+  own tests is part of the exercise. The `solution/` twin has reference tests if you want to
+  compare approaches afterwards.
+- Same relative path in both trees → the `solution/` copy is the answer key (full implementation +
+  tests) for any kata you're stuck on.
 
-See [`java-katas/README.md`](java-katas/README.md) for the kata index and Java build commands.
+See [`java-katas/README.md`](java-katas/README.md) for the kata index and build commands.
 
 ## Adding a new language
 
 Create a sibling directory `<lang>-katas/` that follows the same `solution/` + `practice/`
-split, mirror the tests into both, and leave the practice implementations blank. Then add a row
-to the table above. Conventions for authoring katas are in [`CLAUDE.md`](CLAUDE.md).
+split — full reference (with tests) in `solution/`, blank skeletons and per-kata READMEs (no tests)
+in `practice/`. Then add a row to the table above. Authoring conventions are in
+[`CLAUDE.md`](CLAUDE.md).

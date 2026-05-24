@@ -24,9 +24,16 @@ Implement `ConnectionPool<R>` from scratch — the public API is two constructor
 - **Lazy creation vs idle-queue empty**: an empty idle queue after a successful `acquire` means create a new resource only if `totalCreated < maxSize` — the semaphore's available permits encode this invariant.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/connectionpool/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=ConnectionPoolTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/connectionpool/`

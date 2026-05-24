@@ -30,9 +30,16 @@ Implement `TokenBucketRateLimiter`, `LeakyBucketRateLimiter`, and `SlidingWindow
 - **Algorithm contrast**: token bucket allows bursts up to capacity; leaky bucket enforces a hard throughput ceiling with no burst headroom; sliding window counter prevents boundary spikes at O(1) memory with a small approximation error.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/ratelimit/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=TokenBucketRateLimiterTest,LeakyBucketRateLimiterTest,SlidingWindowRateLimiterTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/ratelimit/`

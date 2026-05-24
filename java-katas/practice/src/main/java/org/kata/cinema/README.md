@@ -27,9 +27,16 @@ Implement `ConcurrentSeatBookingService` from scratch — the public API (`hold`
 - **Caller-supplied `now`.** The interface takes an `Instant` parameter rather than calling the system clock internally, making TTL expiry fully testable without `Thread.sleep` or clock stubs.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/cinema/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=ConcurrentSeatBookingServiceTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/cinema/`

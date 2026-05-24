@@ -28,9 +28,16 @@ Also implement `TimeSlot.overlaps(TimeSlot)` — the `end()` helper and record c
 - **Why the race test breaks**: the unsynchronised `InMemoryBookingService` has an unsynchronised check-then-act, so two threads can both see a table as free and both confirm a booking for the same slot — the test exists to make this observable.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/restaurant/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=InMemoryBookingServiceTest,ConcurrentBookingServiceTest,InMemoryBookingServiceRaceTest,TimeSlotTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/restaurant/`

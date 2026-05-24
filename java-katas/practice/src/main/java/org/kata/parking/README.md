@@ -26,9 +26,16 @@ Implement `ConcurrentParkingLot` from scratch — the public API (`park`, `unpar
 - **Ceiling billing without `double`.** `(milliseconds + 3_599_999) / 3_600_000` gives ceiling hours in pure integer arithmetic. Converting to `double` for `Math.ceil` introduces the very floating-point error `BigDecimal` was meant to prevent.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/parking/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=ConcurrentParkingLotTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/parking/`

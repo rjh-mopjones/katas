@@ -23,9 +23,16 @@ Implement `BoundedBlockingQueue<E>` from scratch — the public API is the const
 - **Circular-array mechanics**: head/tail advance modulo capacity; size tracks the count; take must null out the vacated slot.
 
 ## Run
+
+There are no tests here — **write your own** under `src/test/java/org/kata/blockingqueue/` to drive your
+implementation, then:
+
 ```
-mvn -pl practice test -Dtest=BoundedBlockingQueueTest
+mvn -pl practice test
 ```
+
+The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
+have your own attempt.
 
 ## Reference
 - Worked solution: `solution/src/main/java/org/kata/blockingqueue/`
