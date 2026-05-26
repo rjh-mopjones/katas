@@ -10,6 +10,12 @@ out/
 TestResults/
 *.user
 
+# Python (postgres-katas grader)
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
 # IntelliJ IDEA
 .idea/
 *.iml

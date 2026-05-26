@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:17
+    container_name: postgres-katas
+    environment:
+      POSTGRES_USER: kata
+      POSTGRES_PASSWORD: kata
+      POSTGRES_DB: katas
+      # UTF-8 encoding with C collation: deterministic byte-wise ordering for
+      # reproducible results, while still accepting non-ASCII text.
+      POSTGRES_INITDB_ARGS: "--locale=C.UTF-8"
+    ports:
+      # Host 5433 → container 5432, so this never collides with a local Postgres on 5432.
+      - "5433:5432"
+    volumes:
+      # Files in this dir run once, in lexical order, on first cluster init.
+      - ./db/01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./db/02_seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+      - katas_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kata -d katas"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+volumes:
+  katas_pgdata:

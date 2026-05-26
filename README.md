@@ -10,6 +10,7 @@ own tests**, and diff against the reference solution when stuck.
 |----------|-----------|-------|-------|
 | Java | [`java-katas/`](java-katas/) | Maven · JDK 21 · JUnit 5 | 18 packages (LLD, concurrency, caching, resilience, rate limiting, async/messaging, lock-free) |
 | C# | [`csharp-katas/`](csharp-katas/) | .NET 8 · xUnit | 23 katas (LINQ/iterators, async streams, channels, records, pattern matching, `Span<T>`, generics/variance, plus classic LLD ports) — focused on **language mastery** |
+| SQL | [`postgres-katas/`](postgres-katas/) | PostgreSQL 17 (Docker) · pytest grader | 26 katas (window functions, recursive CTEs & graph traversal, JSON/JSONB + GIN, full-text/trigram, gaps-and-islands, percentiles, upsert/MERGE, SKIP LOCKED, EXPLAIN/indexing) — **write a query, auto-graded** |
 
 _More languages will sit alongside as `<lang>-katas/`._
 

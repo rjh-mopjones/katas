@@ -117,6 +117,44 @@ Rules that hold across languages:
 
 ---
 
+## PostgreSQL (`postgres-katas/`)
+
+A **query** module: the learner writes a SQL query, an auto-grader checks the result. So it diverges
+from the code modules — there are no "write your own tests"; the shared grader (`checker/`) is the
+analog of the reference tests, and `solution/` is the answer key.
+
+- **DB:** `postgres:17` via Docker Compose on host **5433** (never collides with a local 5432).
+  `make up` starts it and loads `db/01_schema.sql` then `db/02_seed.sql`; `make reset` rebuilds.
+- **Grader:** Python `pytest` + `psycopg` in `checker/` (own venv: `make venv`). `test_katas.py` is
+  parametrized over kata dirs; for each it runs the learner's `practice/<kata>/query.sql` and the
+  `solution/<kata>/query.sql` **live** in a rolled-back transaction and compares result sets
+  (NULL/Decimal/float/JSON normalized; unordered multiset by default). Run: `make check` /
+  `make check-kata KATA=04_ranking`.
+- **One shared dataset** in `db/`. **Determinism is critical:** fixed anchor dates +
+  `generate_series` (never `random()` or `now()`/`CURRENT_DATE`), `NUMERIC` money, `C.UTF-8` locale.
+  A non-deterministic seed makes set/ordered comparisons flaky.
+- **Per-kata layout:** `solution/NN_name/query.sql` (reference, with directives) ↔
+  `practice/NN_name/query.sql` (blank `-- TODO`) + `practice/NN_name/README.md` (the problem).
+- **Solution directives** (leading `-- key: value` comments, read by the grader):
+  `-- grade: ordered` (else unordered); `-- mode: mutation` (script mutates then SELECTs final
+  state; rolled back); `-- mode: concurrency` (bespoke two-connection test, e.g. SKIP LOCKED);
+  `-- assert: index=<name>` / `-- assert: no-seq-scan` (EXPLAIN plan-shape checks).
+- Plan-shape assertions are only reliable on selective predicates over large-enough tables (e.g.
+  the GIN kata over 50k events, the index kata over a unique-ish 10k-row predicate) — never assert
+  wall-clock time.
+
+### Recipe: add a new SQL kata
+
+1. Pick `NN_name`. Write `solution/NN_name/query.sql` with directives; run it via
+   `psql -h localhost -p 5433 -U kata -d katas -f …` and confirm a sensible, deterministic result
+   (ordered katas need a total `ORDER BY` with a unique tiebreaker).
+2. Write `practice/NN_name/query.sql` = `-- TODO: write your query` and `practice/NN_name/README.md`
+   (problem → requirements → what you write → the real challenge → run → reference).
+3. Gate: temporarily `cp solution/NN_name/query.sql practice/NN_name/query.sql`, `make check-kata`
+   → green; then restore the `-- TODO` blank → RED.
+
+---
+
 ## Commits
 
 - **Never add `Co-Authored-By` / Claude authorship** to commits.

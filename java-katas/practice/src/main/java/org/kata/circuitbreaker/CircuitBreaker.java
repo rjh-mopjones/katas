@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-public class CircuitBreaker<T,R> {
+public class CircuitBreaker<T, R> {
 
-    public enum State { CLOSED, OPEN, HALF_OPEN }
+    public enum State {CLOSED, OPEN, HALF_OPEN}
 
     private State state = State.CLOSED;
 
@@ -37,55 +37,58 @@ public class CircuitBreaker<T,R> {
     }
 
     public R execute(T param) {
-        State currentState = this.state;
-        if (currentState.equals(State.OPEN)) {
-            evaluateLock(currentState,true);
-            throw new CircuitOpenException("Circuit Is Open");
-        }
+        lock.lock();
         try {
-            R result = functionToCall.apply(param);
-            evaluateLock(currentState, true);
-            return result;
-        } catch (Exception e){
-            evaluateLock(currentState, false);
-            throw e;
+            if (this.state == State.OPEN) {
+                evaluateLock(true);   // count this rejected call toward retryThreshold (clock-free half-open)
+                throw new CircuitOpenException("Circuit Is Open");
+            }
+            try {
+                R result = functionToCall.apply(param);
+                evaluateLock(true);
+                return result;
+            } catch (Exception e) {
+                evaluateLock(false);
+                throw e;
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
-    private void evaluateLock(State state, boolean success) {
-        lock.lock();
-        try {
-            if (state.equals(State.OPEN)){
+    private void evaluateLock(boolean success) {
+        switch (this.state) {
+            case OPEN -> {
                 int currentRetries = 0;
-                if (success){
-                   currentRetries = retries.incrementAndGet();
+                if (success) {
+                    currentRetries = retries.incrementAndGet();
                 } else {
                     retries.set(0);
                 }
-                if (currentRetries == retryThreshold){
+                if (currentRetries == retryThreshold) {
                     this.state = State.HALF_OPEN;
                 }
-            } else if (state.equals(State.HALF_OPEN)){
+            }
+            case HALF_OPEN -> {
                 int currentSuccesses = 0;
-                if (success){
+                if (success) {
                     currentSuccesses = successes.incrementAndGet();
                 } else {
                     successes.set(0);
                 }
-                if (currentSuccesses == successThreshold){
+                if (currentSuccesses == successThreshold) {
                     this.state = State.CLOSED;
                 }
-            } else if (state.equals(State.CLOSED)){
+            }
+            case CLOSED -> {
                 int currentFailures = 0;
                 if (!success) {
                     currentFailures = failures.incrementAndGet();
                 }
-                if (currentFailures == failureThreshold){
+                if (currentFailures == failureThreshold) {
                     this.state = State.OPEN;
                 }
             }
-        } finally {
-            lock.unlock();
         }
     }
 }

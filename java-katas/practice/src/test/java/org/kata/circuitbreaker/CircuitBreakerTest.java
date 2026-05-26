@@ -83,7 +83,9 @@ class CircuitBreakerTest {
             return Boolean.TRUE;
         };
 
-        var breaker = new CircuitBreaker<>(5, 1, 1, trackingFunction);
+        // High retryThreshold: during the storm the breaker should trip OPEN and STAY open
+        // (shed load), never attempting half-open recovery — so the assertions below hold.
+        var breaker = new CircuitBreaker<>(5, Integer.MAX_VALUE, 1, trackingFunction);
         int threads = 100;
 
         AtomicInteger circuitOpenExceptions = new AtomicInteger();
@@ -108,6 +110,7 @@ class CircuitBreakerTest {
             gate.countDown();
             assertTrue(done.await(5, TimeUnit.SECONDS));
         }
+        assertEquals(CircuitBreaker.State.OPEN, breaker.state());
         assertEquals(5, functionCalls.get());
         assertEquals(95, circuitOpenExceptions.get());
     }
