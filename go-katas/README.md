@@ -38,6 +38,20 @@ Start from the practice README; diff against the solution twin when stuck.
 Difficulty varies: `pricecache` / `priceladder` are the most direct; `feedchannel`, `venuefanin`,
 and `shutdown` involve the subtler close/coordination ordering.
 
+### Bigger katas (≈60 min — multi-file, several collaborating types, staged)
+
+These are "fill the hour" katas with a staged path in their README to pace a full pairing round.
+
+| # | Package | Scenario | The trap to get right |
+|---|---------|----------|-----------------------|
+| 9  | [`matchingengine`](practice/matchingengine/) | Limit order book matching engine. | Price-time priority via FIFO levels; integer ticks; quantity conservation (no double-fill); single-writer matching loop. |
+| 10 | [`messagebus`](practice/messagebus/) | In-memory broker modelling RabbitMQ. | At-least-once → idempotent consumers; ack/nack + redelivery; prefetch backpressure; dead-letter; close-once. |
+| 11 | [`ledger`](practice/ledger/) | Double-entry wallet / ledger. | Lost-update RMW under one lock; idempotency keys; deadlock-free transfers (sorted lock order); conservation. |
+| 12 | [`settlepipeline`](practice/settlepipeline/) | Staged settlement pipeline (validate→reserve→settle→notify). | Bounded concurrency per stage; backpressure; end-to-end context cancel; first-error short-circuit; graceful drain. |
+
+The drill in [`drills/aggregator/`](drills/aggregator/) is a separate, self-paced *staged* build of one
+component (its own module, with a worked `solution/`).
+
 ## Commands
 
 Run from `go-katas/` (a `Makefile` wraps these):
@@ -56,6 +70,22 @@ cd practice && go test -race ./pricecache/
 # benchmarks (where a kata's extension adds one)
 cd solution && go test -bench=. ./pricecache/
 ```
+
+### Race-stress
+
+Each concurrency kata's `solution/` carries a `Test*_RaceStress` — high-contention, many-goroutine,
+mixed read/write — meant to be run under the detector and repeated. They're skipped by `-short`
+(they hammer for a while); run them like:
+
+```bash
+cd solution && go test -race ./...               # includes the stress tests once
+cd solution && go test -race -count=5 ./ledger/   # repeat to shake out rare interleavings
+cd solution && go test -race -short ./...         # skip the heavy stress tests (fast CI pass)
+```
+
+A single `-race` pass proving green is not proof a concurrent design is correct — repeat under
+`-count` and vary load. That's the habit these tests build (and how the bug in the aggregator drill
+was caught).
 
 Requires Go 1.22+. Standard library only — no third-party dependencies.
 

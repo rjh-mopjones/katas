@@ -65,16 +65,28 @@ type Update struct {
 // Shutdown is coordinated by two channels and a sync.Once:
 //
 //   - done is closed exactly once by Close (via closeOnce). Closing a channel is
-//     a broadcast: every Publish blocked in select wakes, sees done is readable,
-//     and returns ErrClosed. This is why Publish never sends on a closed updates
-//     channel — it loses the race to the done signal by construction.
+//     a broadcast: every Publish blocked in select wakes and can observe that done
+//     is readable, returning ErrClosed.
 //   - updates is closed exactly once, also under closeOnce, AFTER done is
 //     signalled. "Only the sender closes, and only once": Close is the sole owner
-//     of closing updates, so the subscriber's `range` terminates cleanly and no
-//     publisher can panic by sending afterward (they have already bailed on done).
+//     of closing updates, so the subscriber's `range` terminates cleanly.
+//
+// Closing done is necessary but NOT sufficient to prevent a send-on-closed panic.
+// A select with several ready cases chooses uniformly at random, so a Publish
+// parked in its send select does not deterministically wake on the done arm: if a
+// buffer slot (or a ready receiver) makes the `updates <- u` case ready at the
+// same instant Close runs, the runtime may pick the send exactly as close(updates)
+// executes — and panic. Closing done first does not order the publisher's choice.
+//
+// The mutex is what actually makes it safe. Publish holds mu.RLock across its
+// check-of-done-and-send; Close takes mu.Lock before closing updates. The write
+// lock can only be granted once no Publish holds the read lock — i.e. no Publish
+// is mid-send — so closing updates cannot race a send. mu is the linearisation
+// point (the same idiom the shutdown kata uses for its jobs channel).
 type Broker struct {
 	updates   chan Update
 	done      chan struct{}
+	mu        sync.RWMutex
 	closeOnce sync.Once
 }
 
@@ -93,15 +105,21 @@ func NewBroker(buffer int) *Broker {
 // Publish sends u to the subscriber, blocking under backpressure until space is
 // available, the context is done, or the broker is closed.
 //
-// It never panics on a closed broker. The select races three events: the broker
-// closing (done is readable → ErrClosed), the context being cancelled or timing
-// out while the buffer is full (→ ctx.Err(), so backpressure surfaces as a
-// caller-controlled error rather than data loss or a hang), and the send
-// succeeding (→ nil). Selecting on done before/with the send is what guarantees
-// we never execute `updates <- u` on a channel Close has closed.
+// It never panics on a closed broker. The read lock is held across the check of
+// done and the send: while Publish holds it, Close cannot acquire the write lock
+// and therefore cannot close the updates channel, so the send is safe even though
+// the select might otherwise pick the send arm concurrently with the close. The
+// select races three events: the broker closing (done is readable → ErrClosed),
+// the context being cancelled or timing out while the buffer is full (→ ctx.Err(),
+// so backpressure surfaces as a caller-controlled error rather than data loss or a
+// hang), and the send succeeding (→ nil). The fast-path check returns early if the
+// broker is already closed; the second select re-checks done so a Publish blocked
+// on a full buffer unblocks (with ErrClosed) the moment Close signals.
 func (b *Broker) Publish(ctx context.Context, u Update) error {
-	// Fast path: if already closed, report it without risking the send case being
-	// chosen in a race with a ready buffer slot.
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	// Fast path: if already closed, report it without entering the send select.
 	select {
 	case <-b.done:
 		return ErrClosed
@@ -126,13 +144,17 @@ func (b *Broker) Updates() <-chan Update {
 
 // Close shuts the broker down. It is idempotent and safe to call concurrently
 // with Publish: the sync.Once ensures done and updates are each closed exactly
-// once. Closing done first wakes every blocked Publish (they return ErrClosed)
-// before updates is closed, upholding the "only the sender closes, only once"
-// rule so no Publish can ever send on the closed updates channel. Closing updates
-// terminates the subscriber's range.
+// once. Closing done first wakes every blocked Publish (they return ErrClosed).
+// Taking the write lock before closing updates guarantees no Publish is mid-send
+// — the write lock cannot be granted while any Publish holds the read lock — so
+// closing updates cannot race a send and panic. Closing updates terminates the
+// subscriber's range.
 func (b *Broker) Close() {
 	b.closeOnce.Do(func() {
 		close(b.done)
+
+		b.mu.Lock()
 		close(b.updates)
+		b.mu.Unlock()
 	})
 }
