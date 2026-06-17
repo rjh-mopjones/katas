@@ -155,6 +155,54 @@ analog of the reference tests, and `solution/` is the answer key.
 
 ---
 
+## Go (`go-katas/`)
+
+A **concurrency-correctness** module, themed as a low-latency sports-betting trading platform.
+Same two-tree model, but Go keeps tests next to the code, so the split is by module:
+
+- **Go 1.22+, standard library ONLY** (no third-party deps; `golang.org/x/sync` only if truly
+  needed). Bugs are logic/concurrency defects — everything must `go build` and `go vet` clean.
+- **Two modules:** `solution/` (module `…/go-katas/solution`) and `practice/`
+  (`…/go-katas/practice`). Each kata is a package at the **same relative path** in both
+  (`solution/pricecache/` ↔ `practice/pricecache/`).
+  ```bash
+  cd go-katas/solution && go test -race ./...   # reference suite — green & race-clean
+  cd go-katas/practice && go test -race ./...    # runs the tests YOU write
+  # a Makefile in go-katas/ wraps these (make practice-race, make solution-race, …)
+  ```
+- **Package names** are lower-case domain nouns (`pricecache`, `betmachine`, `venuefanin`) — no
+  `kataNN_` prefixes; the numbered index lives in `go-katas/README.md`.
+- **Tests** (reference suite in `solution/`, and the ones you write in `practice/`): the stdlib
+  `testing` package ONLY — no testify. Descriptive `Test_snake_or_Camel` names. Concurrency tests
+  use a `close(start)` gate + `sync.WaitGroup` join to maximise contention; **deterministic, no
+  `time.Sleep` for synchronisation** (a bounded poll of `runtime.NumGoroutine` for leak checks is OK).
+- **Time / cancellation:** prefer `context.Context` (tests drive it with `context.WithCancel` /
+  `WithTimeout`) over wall-clock. Inject a `func() time.Time` only where elapsed-time math is the point.
+- **Skeleton bodies:** `panic("TODO: implement")`.
+- **Solution doc comments are interview-grade** — explain the *why*, the failure mode in real-money
+  terms, the trade-off, and named alternatives (match the depth of e.g. `pricecache`, `betmachine`).
+
+### Recipe: add a new Go kata
+
+1. Choose a package `org`-free lower-case name (`<name>`).
+2. In **`solution/<name>/`**: write `<name>.go` (domain types + the SUT with rich doc comments) and
+   `<name>_test.go` (behaviour tests pinning the contract, including a `-race` concurrency test).
+   `cd go-katas/solution && go vet ./<name>/ && go test -race ./<name>/` → green.
+3. Mirror into **`practice/<name>/`** (no tests): copy domain/fixture types (structs, enums,
+   `error` vars, func types) **verbatim** so it compiles; reduce each SUT type to a **bare
+   skeleton** — `type Foo struct{}` + every exported constructor/method signature with body
+   `panic("TODO: implement")`. Drop fields, unexported helpers, and doc comments. Import only what
+   the kept signatures need (an unused import fails the build).
+4. Add `practice/<name>/README.md`: `# Title` + one-line `>` scenario → `## The problem` →
+   `## Requirements` → `## What you implement` (public API only) → `## The real challenge`
+   (the concurrency trap + money angle) → `## Run` (no tests, write your own;
+   `cd go-katas/practice && go test -race ./<name>/`) → `## Reference` (`solution/<name>/` + the
+   extension task).
+5. Verify: `cd go-katas/practice && go vet ./<name>/ && go build ./<name>/` succeeds; add a row to
+   `go-katas/README.md`.
+
+---
+
 ## Commits
 
 - **Never add `Co-Authored-By` / Claude authorship** to commits.
@@ -168,3 +216,7 @@ analog of the reference tests, and `solution/` is the answer key.
   *manifests*, which a warm JVM sometimes hides. Re-run if it fails in isolation; not a regression.
 - A reference interview-topic source ("Java Interview Primer") drives which katas exist; new katas
   should map to a real interview topic and carry that pointer in their README.
+- `go-katas/`: `go.mod` pins `go 1.22` (the locally installed toolchain). `go test ./...` over the
+  `practice/` module prints `no test files` per kata — expected (the learner writes them). The
+  `solution/` race tests run real goroutine contention; re-run if a `NumGoroutine` leak poll is
+  ever tight on a loaded machine.
