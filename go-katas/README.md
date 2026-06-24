@@ -48,6 +48,7 @@ These are "fill the hour" katas with a staged path in their README to pace a ful
 | 10 | [`messagebus`](practice/messagebus/) | In-memory broker modelling RabbitMQ. | At-least-once → idempotent consumers; ack/nack + redelivery; prefetch backpressure; dead-letter; close-once. |
 | 11 | [`ledger`](practice/ledger/) | Double-entry wallet / ledger. | Lost-update RMW under one lock; idempotency keys; deadlock-free transfers (sorted lock order); conservation. |
 | 12 | [`settlepipeline`](practice/settlepipeline/) | Staged settlement pipeline (validate→reserve→settle→notify). | Bounded concurrency per stage; backpressure; end-to-end context cancel; first-error short-circuit; graceful drain. |
+| 13 | [`cache`](practice/cache/) | In-memory caches: TTL + LRU + LFU (LFU read-only). | RWMutex read/write discipline; lazy+sweeper expiry; `singleflight` stampede guard; O(1) LRU list surgery ("a read is a write"); LFU freq-buckets. |
 
 The drill in [`drills/aggregator/`](drills/aggregator/) is a separate, self-paced *staged* build of one
 component (its own module, with a worked `solution/`).
