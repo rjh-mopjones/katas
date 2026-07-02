@@ -21,13 +21,14 @@ A generic, thread-safe cache whose entries expire after a TTL, with a stampede-p
 - `Close()` stops the sweeper with **no goroutine leak** (a `done` channel or context).
 - `Delete`/`Invalidate` and `Clear` for explicit invalidation.
 - `GetOrCompute(key, fn)`: on a miss, compute and store; N concurrent misses on the same key run
-  `fn` **exactly once** (use `golang.org/x/sync/singleflight`).
+  `fn` **exactly once** (hand-roll the dedup with an in-flight map — stdlib only, no
+  `golang.org/x/sync/singleflight`).
 
 ### The real challenge
-Lock discipline: `sync.RWMutex`, `RLock` on the read path, full `Lock` to mutate. The
-read-modify-write store inside `GetOrCompute` **must** take the full `Lock` — `singleflight` only
-dedups the *same* key, so distinct-key stores would otherwise race the map (Go's fatal *concurrent
-map writes*). Plus the sweeper goroutine-leak risk on `Close`.
+Lock discipline: `sync.RWMutex`, `RLock` on the read path, full `Lock` to mutate. In `GetOrCompute`,
+hold the lock only to check/register the in-flight computation — **never while `fn` runs** (it may be
+slow I/O) — and store the result via the full-`Lock` `Set`. Plus the sweeper goroutine-leak risk on
+`Close`.
 
 ### What you implement
 `Cache[K, V]`: `NewCache`, `WithClock`, `WithSweepInterval`, `Get`, `Set`, `Delete`, `Invalidate`,
@@ -67,6 +68,7 @@ Compare against the reference suite in `solution/cache/` when you're done.
 
 ## Reference
 - Worked solution: `solution/cache/` (`ttlcache.go`, `lru.go`, `lfu.go` + tests).
-- `golang.org/x/sync/singleflight` — the stampede guard for Exercise 01.
+- Stampede guard for Exercise 01: a hand-rolled in-flight call map (stdlib only). See the
+  worked version in `solution/cache/ttlcache.go` (`GetOrCompute`).
 - Java Interview Primer topics: thread safety, optimistic vs pessimistic locking, atomic
   check-and-act; plus the classic LRU (LeetCode 146) and LFU (LeetCode 460) structures.

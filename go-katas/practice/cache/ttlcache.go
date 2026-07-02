@@ -10,14 +10,7 @@
 // LFU (Exercise 03) is reference-only: there is no skeleton — read solution/cache/lfu.go.
 package cache
 
-import (
-	"time"
-
-	// Pre-wires golang.org/x/sync so the package compiles before you implement
-	// GetOrCompute. Replace this blank import with a real one —
-	// "golang.org/x/sync/singleflight" — when you wire up the stampede guard.
-	_ "golang.org/x/sync/singleflight"
-)
+import "time"
 
 // Option configures a Cache at construction time (functional-options pattern).
 type Option func(*options)
@@ -37,8 +30,9 @@ func WithSweepInterval(d time.Duration) Option { panic("TODO: implement WithSwee
 // NewCache; Close it to stop the background sweeper.
 type Cache[K comparable, V any] struct {
 	// Design the fields: an RWMutex, a map of entries (value + expiry), the default
-	// TTL and injected clock, a done channel + sync.Once for the sweeper, and a
-	// singleflight.Group for GetOrCompute.
+	// TTL and injected clock, a done channel + sync.Once for the sweeper, and an
+	// in-flight map (key -> in-progress computation) for a hand-rolled singleflight
+	// in GetOrCompute (stdlib only — no external dependency).
 }
 
 // NewCache builds the cache and starts the background sweeper. defaultTTL <= 0 means

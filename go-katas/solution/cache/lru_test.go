@@ -1,6 +1,9 @@
 package cache
 
-import "testing"
+import (
+	"sync"
+	"testing"
+)
 
 func TestPutThenGet(t *testing.T) {
 	c := NewLRU[string, int](2)
@@ -111,4 +114,42 @@ func TestCapacityOne(t *testing.T) {
 	if c.Len() != 1 {
 		t.Fatalf("Len() = %d at capacity 1, want 1", c.Len())
 	}
+}
+
+// TestLRU_Concurrent_NoRace hammers Get/Put from many goroutines over an
+// overlapping key space, with capacity < keyspace so evictions fire concurrently.
+// Under `go test -race` this proves the baked-in Mutex guards the recency list; an
+// RWMutex on Get (or no lock) would be flagged. It also asserts no torn values.
+func TestLRU_Concurrent_NoRace(t *testing.T) {
+	c := NewLRU[int, int](8) // cap 8 < keyspace 16 -> eviction churn
+
+	const (
+		goros    = 32
+		ops      = 2000
+		keyspace = 16
+	)
+
+	var wg sync.WaitGroup
+	start := make(chan struct{})
+
+	for g := 0; g < goros; g++ {
+		wg.Add(1)
+		go func(g int) {
+			defer wg.Done()
+			<-start
+			for i := 0; i < ops; i++ {
+				k := (g + i) % keyspace
+				if i%2 == 0 {
+					// every value written for key k satisfies v%keyspace == k
+					c.Put(k, i*keyspace+k)
+				} else if v, ok := c.Get(k); ok && v%keyspace != k {
+					t.Errorf("torn read for key %d: got value %d", k, v)
+					return
+				}
+			}
+		}(g)
+	}
+
+	close(start)
+	wg.Wait()
 }

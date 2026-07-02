@@ -1,5 +1,7 @@
 package cache
 
+import "sync"
+
 // ---------------------------------------------------------------------------
 // Exercise 03: O(1) LFU (least-frequently-used) cache. REFERENCE ONLY.
 //
@@ -95,9 +97,15 @@ func (l *freqList[K, V]) back() *lfuEntry[K, V] {
 	return l.tail.prev
 }
 
-// LFUCache is a fixed-capacity O(1) LFU cache (with an LRU tiebreak within a
-// frequency). Not safe for concurrent use. The zero value is not usable; use NewLFU.
+// LFUCache is a fixed-capacity, concurrency-safe O(1) LFU cache (with an LRU
+// tiebreak within a frequency).
+//
+// It guards all access with a full sync.Mutex, NOT an RWMutex: Get bumps the
+// entry's frequency — a read is a write — so there is no read-only path, and an
+// RWMutex would let two RLock-holding Gets corrupt the frequency lists. The zero
+// value is not usable; use NewLFU.
 type LFUCache[K comparable, V any] struct {
+	mu       sync.Mutex
 	capacity int
 	items    map[K]*lfuEntry[K, V]
 	freqs    map[int]*freqList[K, V]
@@ -132,6 +140,8 @@ func (c *LFUCache[K, V]) touch(e *lfuEntry[K, V]) {
 // Get returns the value for key and whether it was present, bumping its frequency
 // on a hit.
 func (c *LFUCache[K, V]) Get(key K) (V, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	e, ok := c.items[key]
 	if !ok {
 		var zero V
@@ -144,6 +154,8 @@ func (c *LFUCache[K, V]) Get(key K) (V, bool) {
 // Put inserts or updates key=value, evicting the least-frequently-used entry (LRU
 // among the minimum-frequency bucket) if a new insertion would exceed capacity.
 func (c *LFUCache[K, V]) Put(key K, value V) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if c.capacity <= 0 {
 		return
 	}
@@ -169,4 +181,8 @@ func (c *LFUCache[K, V]) Put(key K, value V) {
 }
 
 // Len returns the number of entries currently held.
-func (c *LFUCache[K, V]) Len() int { return len(c.items) }
+func (c *LFUCache[K, V]) Len() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return len(c.items)
+}

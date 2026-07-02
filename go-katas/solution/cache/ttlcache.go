@@ -1,7 +1,7 @@
 // Package cache implements three in-memory caches that build on each other, the
 // canonical "build a cache from scratch" interview drill:
 //
-//	ttlcache.go — a concurrency-safe, generic, TTL'd cache with a singleflight
+//	ttlcache.go — a concurrency-safe, generic, TTL'd cache with a stampede-proof
 //	              GetOrCompute (Exercise 01).
 //	lru.go      — an O(1) LRU cache backed by a hand-rolled doubly-linked list
 //	              and a map (Exercise 02).
@@ -27,11 +27,8 @@
 package cache
 
 import (
-	"fmt"
 	"sync"
 	"time"
-
-	"golang.org/x/sync/singleflight"
 )
 
 // Option configures a Cache at construction time (the functional-options pattern).
@@ -83,12 +80,22 @@ type Cache[K comparable, V any] struct {
 	defaultTTL time.Duration
 	now        func() time.Time
 
-	// sf collapses concurrent misses on the same key into one fn execution. Its
-	// zero value is ready to use.
-	sf singleflight.Group
+	// inflight tracks keys currently being computed by GetOrCompute, so concurrent
+	// callers for the same key join one computation instead of each running fn (a
+	// hand-rolled singleflight). Guarded by mu.
+	inflight map[K]*call[V]
 
 	done      chan struct{}
 	closeOnce sync.Once
+}
+
+// call is one in-flight GetOrCompute computation. The leader runs fn and writes
+// val/err, then calls wg.Done(); waiters block on wg.Wait() and then read val/err
+// (the WaitGroup provides the happens-before, so the read is race-free).
+type call[V any] struct {
+	wg  sync.WaitGroup
+	val V
+	err error
 }
 
 // NewCache returns a ready-to-use cache whose entries expire defaultTTL after they
@@ -101,6 +108,7 @@ func NewCache[K comparable, V any](defaultTTL time.Duration, opts ...Option) *Ca
 	}
 	c := &Cache[K, V]{
 		items:      make(map[K]ttlEntry[V]),
+		inflight:   make(map[K]*call[V]),
 		defaultTTL: defaultTTL,
 		now:        o.clock,
 		done:       make(chan struct{}),
@@ -172,45 +180,53 @@ func (c *Cache[K, V]) Clear() {
 // This is the cache-stampede (a.k.a. thundering-herd / dogpile) guard: without it,
 // a cold miss on a hot key sends N identical expensive calls (DB query, upstream
 // RPC) at the very moment that downstream is already cold and struggling.
-// singleflight.Group.Do elects one caller to run fn and parks the rest on its
-// result. fn errors are propagated to every caller and are NOT cached, so a
-// transient failure self-heals on the next call.
+//
+// The implementation is a hand-rolled singleflight (no external dependency): an
+// in-flight map records which keys are currently being computed. The first caller
+// for a key becomes the leader, runs fn (NOT holding any lock — fn may be slow
+// I/O), and stores the result; concurrent callers find the in-flight entry, block
+// on its WaitGroup, and share the leader's result. fn errors are propagated to the
+// waiters and are NOT cached, so a transient failure self-heals on the next call.
 func (c *Cache[K, V]) GetOrCompute(key K, fn func() (V, error)) (V, error) {
 	// Fast path: pure read lock. The overwhelming majority of calls hit here.
 	if v, ok := c.Get(key); ok {
 		return v, nil
 	}
-	v, err, _ := c.sf.Do(c.flightKey(key), func() (any, error) {
-		// Double-check: another goroutine may have populated key between our
-		// fast-path miss and us winning the singleflight slot.
-		if v, ok := c.Get(key); ok {
-			return v, nil
-		}
-		computed, err := fn()
-		if err != nil {
-			return nil, err // do not cache failures
-		}
-		// Store via Set, which takes the FULL write Lock — not an RLock. singleflight
-		// only serialises callers of the *same* key; goroutines computing *distinct*
-		// keys store concurrently, and RWMutex permits many RLock holders at once, so
-		// an RLock store would be a write/write data race on the map (Go aborts with a
-		// fatal "concurrent map writes"). The read-modify-write's write half must be
-		// mutually exclusive.
-		c.Set(key, computed)
-		return computed, nil
-	})
-	if err != nil {
-		var zero V
-		return zero, err
-	}
-	return v.(V), nil
-}
 
-// flightKey maps a comparable key to the string singleflight wants. fmt.Sprintf
-// "%v" is the pragmatic choice and is collision-free for string/integer keys; the
-// alternative that avoids stringification entirely is a map[K]*sync.Mutex of
-// per-key locks (more code, no formatting).
-func (c *Cache[K, V]) flightKey(key K) string { return fmt.Sprintf("%v", key) }
+	c.mu.Lock()
+	// Double-check under the lock — another goroutine may have populated key between
+	// our fast-path miss and acquiring the lock.
+	if e, ok := c.items[key]; ok && !e.expired(c.now()) {
+		c.mu.Unlock()
+		return e.value, nil
+	}
+	// If someone is already computing this key, join them: block on their call.
+	if cl, ok := c.inflight[key]; ok {
+		c.mu.Unlock()
+		cl.wg.Wait()
+		return cl.val, cl.err
+	}
+	// Otherwise we are the leader. Register the in-flight call before releasing mu.
+	cl := &call[V]{}
+	cl.wg.Add(1)
+	c.inflight[key] = cl
+	c.mu.Unlock()
+
+	// Run fn without holding the lock. Set takes the full write Lock itself.
+	cl.val, cl.err = fn()
+	if cl.err == nil {
+		c.Set(key, cl.val) // do not cache failures
+	}
+
+	// Deregister and wake every waiter. Writing val/err before wg.Done() establishes
+	// the happens-before that lets waiters read them race-free.
+	c.mu.Lock()
+	delete(c.inflight, key)
+	c.mu.Unlock()
+	cl.wg.Done()
+
+	return cl.val, cl.err
+}
 
 // Len returns the number of entries currently stored, including any expired ones
 // the sweeper has not yet reclaimed. Intended for tests and metrics.

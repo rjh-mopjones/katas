@@ -1,5 +1,7 @@
 package cache
 
+import "sync"
+
 // ---------------------------------------------------------------------------
 // Exercise 02: O(1) LRU (least-recently-used) cache.
 //
@@ -22,12 +24,14 @@ type node[K comparable, V any] struct {
 	prev, next *node[K, V]
 }
 
-// LRUCache is a fixed-capacity O(1) LRU cache.
+// LRUCache is a fixed-capacity, concurrency-safe O(1) LRU cache.
 //
-// It is NOT safe for concurrent use. Because Get mutates recency (see below), a
-// concurrency-safe wrapper must guard Get with a full Mutex, not an RWMutex —
-// "a read is a write" in an LRU. The zero value is not usable; use NewLRU.
+// It guards all access with a full sync.Mutex, NOT an RWMutex: in an LRU a read is
+// a write — Get reorders the recency list (moveToFront) — so there is no read-only
+// path to optimise, and an RWMutex would let two RLock-holding Gets corrupt the
+// list concurrently. The zero value is not usable; use NewLRU.
 type LRUCache[K comparable, V any] struct {
+	mu         sync.Mutex
 	capacity   int
 	items      map[K]*node[K, V]
 	head, tail *node[K, V] // sentinels: head.next is MRU, tail.prev is LRU
@@ -55,10 +59,11 @@ func NewLRU[K comparable, V any](capacity int) *LRUCache[K, V] {
 // Get returns the value for key and whether it was present, and on a hit promotes
 // key to most-recently-used.
 //
-// Note that Get MUTATES state: it reorders the recency list. In an LRU a read is a
-// write, which is exactly why the concurrent variant cannot serve Get under a read
-// lock.
+// It takes the full Lock — not an RLock — because Get MUTATES state: it reorders
+// the recency list. In an LRU a read is a write.
 func (c *LRUCache[K, V]) Get(key K) (V, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	n, ok := c.items[key]
 	if !ok {
 		var zero V
@@ -71,6 +76,8 @@ func (c *LRUCache[K, V]) Get(key K) (V, bool) {
 // Put inserts or updates key=value and marks it most-recently-used, evicting the
 // least-recently-used entry first if a new insertion would exceed capacity.
 func (c *LRUCache[K, V]) Put(key K, value V) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if n, ok := c.items[key]; ok {
 		n.value = value  // update in place — must not grow the map
 		c.moveToFront(n) // updating also refreshes recency
@@ -88,7 +95,11 @@ func (c *LRUCache[K, V]) Put(key K, value V) {
 }
 
 // Len returns the number of entries currently held.
-func (c *LRUCache[K, V]) Len() int { return len(c.items) }
+func (c *LRUCache[K, V]) Len() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return len(c.items)
+}
 
 // addToFront splices n in just after the head sentinel (the MRU position).
 func (c *LRUCache[K, V]) addToFront(n *node[K, V]) {
