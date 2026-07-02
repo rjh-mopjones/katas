@@ -12,6 +12,7 @@ own tests**, and diff against the reference solution when stuck.
 | C# | [`csharp-katas/`](csharp-katas/) | .NET 8 · xUnit | 23 katas (LINQ/iterators, async streams, channels, records, pattern matching, `Span<T>`, generics/variance, plus classic LLD ports) — focused on **language mastery** |
 | SQL | [`postgres-katas/`](postgres-katas/) | PostgreSQL 17 (Docker) · pytest grader | 26 katas (window functions, recursive CTEs & graph traversal, JSON/JSONB + GIN, full-text/trigram, gaps-and-islands, percentiles, upsert/MERGE, SKIP LOCKED, EXPLAIN/indexing) — **write a query, auto-graded** |
 | Go | [`go-katas/`](go-katas/) | Go 1.22 · `testing` · `-race` | 12 katas + a staged drill (data races, goroutine leaks, channel discipline, lost updates, idempotency, fan-in backpressure, context propagation, graceful shutdown, plus bigger ~60-min builds: matching engine, RabbitMQ-style bus, double-entry ledger, settlement pipeline) — concurrency correctness for a low-latency trading platform, each `solution/` carrying a `-race` stress test |
+| C++ | [`cpp-katas/`](cpp-katas/) | CMake · C++20 · hand-rolled harness · TSan | 5 katas (exchange-session RAII, tick buffer, intrusive order handle, seqlock quote publisher, lock-free SPSC feed pipe) — mechanics + concurrency for a low-latency trading platform, each concurrency kata carrying a TSan stress test |
 
 _More languages will sit alongside as `<lang>-katas/`._
 

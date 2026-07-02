@@ -203,6 +203,75 @@ Same two-tree model, but Go keeps tests next to the code, so the split is by mod
 
 ---
 
+## C++ (`cpp-katas/`)
+
+A **mechanics + concurrency** module, themed as a low-latency trading platform (like `go-katas/`).
+Same two-tree model; C++ keeps tests next to the code, split by CMake target instead of by module.
+
+- **C++20, CMake ≥ 3.20, standard library ONLY** (no GoogleTest/Catch2/Boost). A ~100-line
+  hand-rolled harness (`solution/common/harness.hpp`) is the analogue of Go's stdlib `testing`.
+  Everything must build `-Wall -Wextra` clean (solution adds `-Werror`).
+- **Two roots, built by one CMake project:** `solution/` (reference impls + tests, always GREEN) and
+  `practice/` (blank skeletons; a `practice_compile` OBJECT target proves they compile — the C++
+  analogue of `go build ./...`). Each kata is a folder at the **same relative path** in both.
+  ```bash
+  cd cpp-katas
+  make solution        # build all + ctest — reference suite, GREEN (also compiles the skeletons)
+  make practice        # compile just the skeletons (no tests)
+  make solution-tsan   # rebuild -DKATAS_SANITIZE=thread and ctest — the `go test -race` analogue
+  ctest --test-dir build -R <kata>   # one kata (≈ go test ./<kata>/)
+  ```
+- **Namespace** `katas`; per-kata folder is a lower-case domain noun (`exchange_session`,
+  `top_of_book`) — no `kataNN_` prefix; the numbered index lives in `cpp-katas/README.md`.
+- **Scenario framing is mandatory** (this is what makes a kata, not a data-structure drill): name the
+  SUT after a **trading-system component**, open the README with a one-line `>` scenario blockquote
+  naming where it lives, tell "The problem" as a narrative, and **defer the data-structure /
+  concurrency depth to a "The real challenge" section**. Do not ship a kata named after a bare
+  structure (`ring_buffer`, `spsc_queue`); frame it as the component (`tick_buffer`, `feed_pipe`).
+  The `java-katas` `orderbook` README is the tone template.
+- **Test harness:** header-only. `KATA_TEST(name) { ... }` self-registers a test; `EXPECT_TRUE/EQ/NE`,
+  `ASSERT_TRUE/EQ`, `EXPECT_THROWS(expr, Exc)`; `KATA_MAIN()` at the end of the `*_test.cpp` runs
+  all registered tests (optional `argv[1]` substring filter). `EXPECT_EQ` binds operands **by value**
+  (avoids dangling references from `opt.value()`), so compared types must be copyable.
+- **Concurrency tests:** put extra stress cases in a second `*_stress_test.cpp` with **no**
+  `KATA_MAIN()` — every TU registers into one shared registry, so the single `main` in `*_test.cpp`
+  runs them all. Gate worker threads with `kata::StartGate` (a `std::latch`, the `close(start)`
+  analogue) and join via `std::jthread`. Add a `Seq`-style self-consistency invariant so torn/lost
+  reads are caught **even without** the sanitizer. Verify under `-DKATAS_SANITIZE=thread` (TSan).
+- **Payload atomicity trap:** a seqlock's payload must be per-field `std::atomic` (relaxed), not plain
+  — a plain-access seqlock is a data race (UB) that TSan flags. An SPSC ring's slots *can* be plain
+  `T` because the release/acquire hand-off gives each slot a single accessor at a time.
+- **Skeleton body idiom:** `throw std::logic_error("TODO: implement");`. But a `noexcept` member must
+  not throw (`-Wexceptions`) — give those a benign stub (`return false;` / `return {};`). Keep every
+  public signature identical to the solution; drop private members/helpers. Copy fixture/domain types
+  (structs, provided scaffolding like `OrderPool`) **verbatim** so the skeleton compiles.
+- **Time/clock convention** (for any future time-based kata): inject a
+  `Clock = std::function<std::chrono::steady_clock::time_point()>` defaulting to
+  `std::chrono::steady_clock::now`; tests drive a manual clock — never real sleeps for elapsed-time
+  math.
+- **Solution doc comments are interview-grade** — a file-level block explaining the trap, the chosen
+  primitive, the trade-off + named alternatives, and the money angle (why the bug costs real P&L),
+  matching the depth of `exchange_session.hpp` / `top_of_book.hpp`.
+
+### Recipe: add a new C++ kata
+
+1. **Frame it as a component.** Pick a trading-system component and a lower-case folder `<name>`; the
+   README leads with a `>` scenario blockquote and defers the C++ depth to "The real challenge"
+   (see `orderbook`). Never a bare data-structure name.
+2. In **`solution/<name>/`**: write `<name>.hpp` (fixtures + the SUT, header-only, interview-grade doc
+   comment) and `<name>_test.cpp` (behaviour tests ending in `KATA_MAIN()`); for a concurrency kata
+   add `<name>_stress_test.cpp` (gated `StartGate` stress, no `KATA_MAIN()`).
+3. Add a `kata_test(<name> …sources…)` line to `solution/CMakeLists.txt` (registers the CTest).
+4. Mirror into **`practice/<name>/`** (no tests): copy fixtures verbatim; reduce the SUT to the same
+   public signatures with `throw std::logic_error("TODO: implement")` bodies (benign stubs for
+   `noexcept` members). Add `compile_check.cpp` (`#include` the header; for a template, force it with
+   `template class katas::<Type><…>;`) and a `README.md` (the 8-section format). Add the
+   `compile_check.cpp` to `practice/CMakeLists.txt`'s `practice_compile` sources + its include dir.
+5. Verify: `make solution` is GREEN, `make practice` compiles, `make solution-tsan` is race-clean for
+   a concurrency kata; add a row to `cpp-katas/README.md`.
+
+---
+
 ## Commits
 
 - **Never add `Co-Authored-By` / Claude authorship** to commits.
