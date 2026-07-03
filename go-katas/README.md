@@ -49,6 +49,7 @@ These are "fill the hour" katas with a staged path in their README to pace a ful
 | 11 | [`ledger`](practice/ledger/) | Double-entry wallet / ledger. | Lost-update RMW under one lock; idempotency keys; deadlock-free transfers (sorted lock order); conservation. |
 | 12 | [`settlepipeline`](practice/settlepipeline/) | Staged settlement pipeline (validate→reserve→settle→notify). | Bounded concurrency per stage; backpressure; end-to-end context cancel; first-error short-circuit; graceful drain. |
 | 13 | [`cache`](practice/cache/) | In-memory caches: TTL + LRU + LFU (LFU read-only). | RWMutex read/write discipline; lazy+sweeper expiry; `singleflight` stampede guard; O(1) LRU list surgery ("a read is a write"); LFU freq-buckets. |
+| 14 | [`betgateway`](practice/betgateway/) | HTTP bet-submission endpoint (`http.Handler`) with idempotency + rate limiting. | Double-submit is a TOCTOU race — single-flight per `Idempotency-Key` so the same bet places exactly once; lock never held across the downstream call; status-code discipline; tested with `net/http/httptest`. |
 
 The drill in [`drills/aggregator/`](drills/aggregator/) is a separate, self-paced *staged* build of one
 component (its own module, with a worked `solution/`).
