@@ -1,0 +1,16 @@
+# rust-katas — Cargo workspace.
+#
+# Two mirrored library crates (the repo's two-tree model):
+#   solution/  — full reference implementations + the built-in test suite (must stay GREEN)
+#   practice/  — blank skeletons (`todo!()` bodies); `cargo build -p practice` proves they compile
+#
+# Standard library only — no third-party dependencies (nightly + the `miri` component are needed only
+# for the optional `spscring` unsafe capstone).
+[workspace]
+members = ["solution", "practice"]
+resolver = "3"
+
+[workspace.package]
+edition = "2024"
+version = "0.0.0"
+publish = false

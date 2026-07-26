@@ -272,6 +272,66 @@ Same two-tree model; C++ keeps tests next to the code, split by CMake target ins
 
 ---
 
+## Rust (`rust-katas/`)
+
+A **senior-interview** module: the open-ended "implement this in ~an hour" asks. **~50% trading
+components, ~50% plain CS/Rust classics** (LRU, thread pool, expression evaluator, pub/sub) — a
+deliberate mix (do NOT make every kata trading-themed). Same two-tree model, split by crate.
+
+- **Edition 2024, stable Rust, standard library ONLY** (no third-party crates). Nightly + the `miri`
+  component are needed ONLY for the `spscring` unsafe capstone. Everything must be `cargo clippy
+  -p solution -- -D warnings` clean.
+- **Cargo workspace, two library crates:** `solution/` (reference impls + tests, always GREEN) and
+  `practice/` (blank skeletons; `cargo build -p practice` proves they compile — the analogue of
+  `go build` / `cmake --build practice`). Each kata is a directory module at the **same relative path**
+  in both: `solution/src/<kata>/mod.rs` ↔ `practice/src/<kata>/mod.rs`.
+  ```bash
+  cd rust-katas
+  make solution        # cargo test -p solution — reference suite GREEN (also add the mod to both lib.rs)
+  make practice        # cargo build -p practice — skeletons compile
+  make clippy          # cargo clippy -p solution -- -D warnings
+  make miri            # cargo +nightly miri test -p solution spscring (needs: rustup component add miri)
+  cargo test -p solution <kata>   # one kata
+  ```
+- **No hand-rolled harness (unlike C++):** testing is BUILT IN — `#[test]` + `cargo test`. That is the
+  "stdlib only" story. Each solution module ends in a `#[cfg(test)] mod tests`. Per-kata folder =
+  directory module so the practice `README.md` sits beside `mod.rs` (the compiler ignores the `.md`).
+- **Scenario framing is mandatory, theme is not:** each kata maps to a real senior "implement-in-an-
+  hour" ask; ~half are trading components, ~half are plain CS/Rust classics (a calculator, an LRU
+  cache — NO forced trading dressing). Lead each README with a `>` scenario and defer the language
+  depth to "The real challenge". Money angle only on the trading katas.
+- **Skeleton body idiom:** `todo!()`. A crate of `todo!()` bodies still compiles (it is `!`, coerces
+  anywhere), so `cargo build -p practice` is the compile-gate. Copy fixture/domain types (structs,
+  enums, provided scaffolding) **verbatim**; keep public signatures identical; prefix otherwise-unused
+  params with `_` to keep the skeleton tidy.
+- **Rust changes the concurrency game:** it eliminates **data races at compile time** (Send/Sync +
+  borrow checker), so there is NO `-race`/TSan "prove the data race" exercise — a data race won't
+  compile. Concurrency katas target **deadlock** (lock ordering — `positionbook`), **lost update**
+  (Mutex granularity), **channel discipline / graceful shutdown** (`threadpool`), and — for `unsafe`
+  code — real **UB verified with Miri** (`spscring`). Gate concurrency-stress threads with
+  `std::sync::Barrier` inside `std::thread::scope` (the `close(start)` analogue); keep them
+  deterministic (no `sleep` for synchronisation) with a self-consistency/FIFO invariant.
+- **`unsafe` katas** carry an interview-grade `//!` doc justifying every `unsafe` block (a `// SAFETY:`
+  comment per block), a hand-written `unsafe impl Send/Sync` with its justification, and a `Drop` that
+  cleans up; verify under `cargo +nightly miri test`.
+- **Solution `//!` docs are interview-grade** — the trap, the chosen construct, the trade-off + named
+  alternatives, and (trading katas only) the money angle — matching `tickparser.rs` / `spscring.rs`.
+
+### Recipe: add a new Rust kata
+
+1. **Map it to a real senior ask** and pick a lower-case module name `<name>`; decide trading vs
+   classic (keep the module ~50/50). The README leads with a `>` scenario and defers depth to "The
+   real challenge"; never a bare-data-structure framing for a trading kata.
+2. In **`solution/src/<name>/mod.rs`**: fixtures + the impl (interview-grade `//!` doc) + a
+   `#[cfg(test)] mod tests`; a concurrency kata adds a `Barrier`-gated stress test.
+3. Add `pub mod <name>;` to **both** `solution/src/lib.rs` and `practice/src/lib.rs`.
+4. Mirror into **`practice/src/<name>/mod.rs`** (no tests): fixtures verbatim + the same public
+   signatures with `todo!()` bodies; add a `README.md` (the 8-section format).
+5. Verify: `make solution` GREEN, `make practice` compiles, `make clippy` clean (and `make miri` for an
+   `unsafe` kata); add a row to `rust-katas/README.md`.
+
+---
+
 ## Commits
 
 - **Never add `Co-Authored-By` / Claude authorship** to commits.

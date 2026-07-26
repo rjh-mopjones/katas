@@ -13,6 +13,7 @@ own tests**, and diff against the reference solution when stuck.
 | SQL | [`postgres-katas/`](postgres-katas/) | PostgreSQL 17 (Docker) · pytest grader | 26 katas (window functions, recursive CTEs & graph traversal, JSON/JSONB + GIN, full-text/trigram, gaps-and-islands, percentiles, upsert/MERGE, SKIP LOCKED, EXPLAIN/indexing) — **write a query, auto-graded** |
 | Go | [`go-katas/`](go-katas/) | Go 1.22 · `testing` · `-race` | 12 katas + a staged drill (data races, goroutine leaks, channel discipline, lost updates, idempotency, fan-in backpressure, context propagation, graceful shutdown, plus bigger ~60-min builds: matching engine, RabbitMQ-style bus, double-entry ledger, settlement pipeline) — concurrency correctness for a low-latency trading platform, each `solution/` carrying a `-race` stress test |
 | C++ | [`cpp-katas/`](cpp-katas/) | CMake · C++20 · hand-rolled harness · TSan | 5 katas (exchange-session RAII, tick buffer, intrusive order handle, seqlock quote publisher, lock-free SPSC feed pipe) — mechanics + concurrency for a low-latency trading platform, each concurrency kata carrying a TSan stress test |
+| Rust | [`rust-katas/`](rust-katas/) | Cargo · edition 2024 · `cargo test` · Miri | 9 katas — half trading, half CS classics: zero-copy parser (lifetimes), expression evaluator, custom `Iterator`, pub/sub dispatch, LRU cache, thread pool, `Arc<Mutex>` position book, order state machine, + an `unsafe` lock-free SPSC ring verified under Miri |
 
 _More languages will sit alongside as `<lang>-katas/`._
 
