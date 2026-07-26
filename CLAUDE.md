@@ -332,6 +332,59 @@ deliberate mix (do NOT make every kata trading-themed). Same two-tree model, spl
 
 ---
 
+## Python (`python-katas/`)
+
+A **senior-Python** module framed as **LLD scenarios** (real systems, like `java-katas`), *not*
+"implement a language feature from scratch" drills. Each kata is a small system with behavioural
+rules; a distinctive Python idiom (the data model, context managers, generators, decorators, asyncio,
+`match`, Protocols) is the elegant *tool*, surfaced in "The real challenge".
+
+- **Python 3.11+, standard library ONLY**, fully **type-hinted** (`X | None`, `list[str]`). Lint with
+  **ruff** (globally installed); the solution must be `ruff check` clean (line-length 100, `py311`;
+  config in `pyproject.toml`).
+- **Test framework: pytest in a `.venv`** (matches `postgres-katas`). Each solution kata carries a
+  `test_<kata>.py` importing via `from . import ...`. **Async katas are tested with `asyncio.run(...)`
+  inside plain `def test_...()` — NO `pytest-asyncio`.**
+  ```bash
+  cd python-katas
+  make venv        # python3 -m venv .venv + pip install pytest  (once)
+  make solution    # pytest solution -q — reference suite GREEN
+  make practice    # compileall + import every skeleton — proves they parse/import
+  make lint        # ruff check solution practice
+  .venv/bin/pytest solution/<kata> -q     # one kata
+  ```
+- **Per-kata = a package dir** at the same path in both trees: `solution/<kata>/__init__.py` (impl +
+  interview-grade module docstring) + `solution/<kata>/test_<kata>.py`; `practice/<kata>/__init__.py`
+  (skeleton) + `practice/<kata>/README.md`. `solution/` and `practice/` each have an empty
+  `__init__.py`.
+- **Scenario framing is mandatory** (this is what makes a kata, not a drill): the kata is a **real
+  system with behavioural rules** (a spreadsheet, a mini-Redis, a file system — see `java-katas`
+  `orderbook`/`circuitbreaker` for tone), and the Python idiom is deferred to "The real challenge".
+  Do NOT ship a kata whose title is "implement a decorator / a generator / a context manager". Mix
+  domains (mastery-forward, light trading flavour — money angle only on trading katas).
+- **Skeleton idiom:** `raise NotImplementedError`. Copy fixtures/domain types (dataclasses, enums,
+  Protocols, custom exceptions) **verbatim**; keep public signatures identical. A skeleton only
+  *defines* classes/functions at import time, so `make practice` (compileall + import) is the gate —
+  `NotImplementedError` fires only when a body is called.
+- **Solution module docstrings are interview-grade** — the scenario, the design/pattern choice
+  (Strategy/State/Observer/…), the trade-off + named alternatives, and (trading katas only) the money
+  angle — matching `spreadsheet`/`workflow`.
+
+### Recipe: add a new Python kata
+
+1. **Pick a real system/scenario** (an LLD-style component with rules), not a language-feature drill;
+   choose a lower-case `<name>`. The README leads with a `>` scenario and defers the idiom to "The
+   real challenge".
+2. In **`solution/<name>/`**: `__init__.py` (fixtures + impl + module docstring) and
+   `test_<name>.py` (pytest, `from . import ...`, `asyncio.run` for async). `pytest solution/<name>` →
+   green; `ruff check solution/<name>` → clean.
+3. Mirror into **`practice/<name>/`** (no tests): fixtures verbatim + the same signatures with
+   `raise NotImplementedError`; add a `README.md` (Java scenario 8-section format).
+4. Verify: `make solution` GREEN, `make practice` imports, `make lint` clean; add a row to
+   `python-katas/README.md`. (No central registry — pytest auto-discovers.)
+
+---
+
 ## Commits
 
 - **Never add `Co-Authored-By` / Claude authorship** to commits.
