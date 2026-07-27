@@ -35,6 +35,7 @@ worker threads together — the C++ mirror of Go's `close(start)` gate — and a
 | 3 | [`order_handle`](practice/order_handle/) | mechanics | Intrusive ref-counted handle to a pooled order shared by the book, id-index, and risk engine. | Rule of five on a shared resource, self-assignment safety, reclaim-exactly-once. |
 | 4 | [`top_of_book`](practice/top_of_book/) | concurrency | Seqlock quote publisher: one writer publishes best bid/ask, many strategy readers never block it. | Seqlock protocol, acquire/release ordering, atomic payload (TSan-clean), torn-read avoidance. |
 | 5 | [`feed_pipe`](practice/feed_pipe/) | concurrency | Wait-free SPSC ring from the feed-handler thread to the strategy thread. | Lock-free SPSC, release/acquire hand-off, one-empty-slot full/empty, false sharing. |
+| 6 | [`feed_parser`](practice/feed_parser/) | mechanics | Streaming parser: pipe-delimited text feed -> typed `Quote`s, malformed lines reported by line number, not thrown. | `string_view` zero-copy field slicing, `from_chars` (no alloc/no throw/locale-independent), streaming getline, line-numbered errors. |
 
 Each `practice/<kata>/README.md` is the prompt: scenario → problem → requirements → what you implement
 → the real challenge → run → reference + extension.

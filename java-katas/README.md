@@ -50,6 +50,7 @@ mvn test                 # everything
 | `idempotency` | exactly-once / dedup processor |
 | `scheduler` | delay-queue task scheduler |
 | `lockfree` | Treiber stack, Michael-Scott queue, ABA-safe stack |
+| `feedparser` | lazy Stream feed parsing, sealed result type, line-numbered errors |
 
 > **IntelliJ:** after the restructure, re-import the Maven project (open `pom.xml` as project, or
 > *Maven tool window → Reload*) so both modules are recognised.

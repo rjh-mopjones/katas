@@ -117,9 +117,77 @@ pub fn parse(line: &str) -> Result<Quote<'_>, ParseError> {
     })
 }
 
+/// Stream a whole feed: parse every non-blank, non-`#`-comment line, yielding `(line_no, result)`
+/// with the 1-based *physical* line number (blank/comment lines are skipped but still counted).
+///
+/// This is the file-level sibling of [`parse`], and the Rust member of the cross-language "feed
+/// parser" kata (`feed_parser` / `feedparser` / `FeedParser` in the other modules — whose fourth
+/// field is `qty` rather than the monotonic `seq` used here). It is **lazy**: it borrows `input` and
+/// parses one line at a time, so each [`Quote`] still borrows the feed — zero-copy streaming, not a
+/// slurp-then-parse.
+pub fn parse_feed(input: &str) -> impl Iterator<Item = (usize, Result<Quote<'_>, ParseError>)> {
+    input.lines().enumerate().filter_map(|(i, line)| {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            None
+        } else {
+            Some((i + 1, parse(trimmed)))
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parse_feed_streams_skips_and_numbers_lines() {
+        let feed = "\
+# market data feed
+LIV-MUN|1.95|2.05|1000
+
+ARS-CHE|1.50|1.60|500
+|1.0|2.0|10
+BAD|x|2.0|10
+TOO|1.0|2.0
+NEG|1.0|2.0|-5";
+        let mut quotes = Vec::new();
+        let mut errors = Vec::new();
+        for (line, result) in parse_feed(feed) {
+            match result {
+                Ok(q) => quotes.push((line, q)),
+                Err(e) => errors.push((line, e)),
+            }
+        }
+
+        // Two good records (blank + comment lines skipped, but the physical line numbers still count).
+        assert_eq!(quotes.len(), 2);
+        assert_eq!(
+            (quotes[0].0, quotes[0].1.symbol, quotes[0].1.seq),
+            (2, "LIV-MUN", 1000)
+        );
+        assert_eq!(
+            (quotes[1].0, quotes[1].1.symbol, quotes[1].1.seq),
+            (4, "ARS-CHE", 500)
+        );
+
+        // Each malformed line reported with its 1-based physical line number.
+        assert_eq!(
+            errors,
+            vec![
+                (5, ParseError::EmptySymbol),
+                (6, ParseError::InvalidBid),
+                (
+                    7,
+                    ParseError::WrongFieldCount {
+                        expected: 4,
+                        got: 3
+                    }
+                ),
+                (8, ParseError::InvalidSeq),
+            ]
+        );
+    }
 
     #[test]
     fn parses_a_valid_line() {

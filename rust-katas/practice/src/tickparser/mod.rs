@@ -32,3 +32,10 @@ impl Error for ParseError {}
 pub fn parse(_line: &str) -> Result<Quote<'_>, ParseError> {
     todo!("implement zero-copy parse")
 }
+
+/// Stream a whole feed: parse every non-blank, non-`#`-comment line, yielding `(line_no, result)`
+/// with the 1-based physical line number. Lazy — borrows `input`, parses one line at a time.
+pub fn parse_feed(input: &str) -> impl Iterator<Item = (usize, Result<Quote<'_>, ParseError>)> {
+    let _ = input;
+    std::iter::from_fn(|| todo!("implement streaming parse_feed"))
+}

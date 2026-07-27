@@ -44,6 +44,7 @@ dotnet build                                                 # whole solution
 | `ValueEquality` | `IEquatable<T>`/`IComparable<T>`, operator overloading, struct | med |
 | `PatternMatching` | switch expressions, property/positional/list patterns | med |
 | `Spans` | `ReadOnlySpan<char>`, `stackalloc`, allocation-free parsing | hard |
+| `FeedParser` | `ReadOnlySpan<char>` field slicing, span `TryParse`, streaming `yield` | hard |
 | `Structs` | `readonly struct`, `in` params, `ref struct` | med |
 | `Generics` | `Option`/`Result`, constraints, variance (`in`/`out`) | med |
 | `EventsDelegates` | `event`/`EventHandler<T>`, `Func`/`Action`, pub/sub | med |

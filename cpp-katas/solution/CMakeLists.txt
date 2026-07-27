@@ -28,3 +28,4 @@ kata_test(top_of_book      top_of_book/top_of_book_test.cpp
                            top_of_book/top_of_book_stress_test.cpp)
 kata_test(feed_pipe        feed_pipe/feed_pipe_test.cpp
                            feed_pipe/feed_pipe_stress_test.cpp)
+kata_test(feed_parser      feed_parser/feed_parser_test.cpp)

@@ -8,13 +8,19 @@ own tests**, and diff against the reference solution when stuck.
 
 | Language | Directory | Stack | Katas |
 |----------|-----------|-------|-------|
-| Java | [`java-katas/`](java-katas/) | Maven · JDK 21 · JUnit 5 | 18 packages (LLD, concurrency, caching, resilience, rate limiting, async/messaging, lock-free) |
-| C# | [`csharp-katas/`](csharp-katas/) | .NET 8 · xUnit | 23 katas (LINQ/iterators, async streams, channels, records, pattern matching, `Span<T>`, generics/variance, plus classic LLD ports) — focused on **language mastery** |
+| Java | [`java-katas/`](java-katas/) | Maven · JDK 21 · JUnit 5 | 19 packages (LLD, concurrency, caching, resilience, rate limiting, async/messaging, lock-free, streaming parsing) |
+| C# | [`csharp-katas/`](csharp-katas/) | .NET 8 · xUnit | 24 katas (LINQ/iterators, async streams, channels, records, pattern matching, `Span<T>` + streaming parsing, generics/variance, plus classic LLD ports) — focused on **language mastery** |
 | SQL | [`postgres-katas/`](postgres-katas/) | PostgreSQL 17 (Docker) · pytest grader | 26 katas (window functions, recursive CTEs & graph traversal, JSON/JSONB + GIN, full-text/trigram, gaps-and-islands, percentiles, upsert/MERGE, SKIP LOCKED, EXPLAIN/indexing) — **write a query, auto-graded** |
-| Go | [`go-katas/`](go-katas/) | Go 1.22 · `testing` · `-race` | 12 katas + a staged drill (data races, goroutine leaks, channel discipline, lost updates, idempotency, fan-in backpressure, context propagation, graceful shutdown, plus bigger ~60-min builds: matching engine, RabbitMQ-style bus, double-entry ledger, settlement pipeline) — concurrency correctness for a low-latency trading platform, each `solution/` carrying a `-race` stress test |
-| C++ | [`cpp-katas/`](cpp-katas/) | CMake · C++20 · hand-rolled harness · TSan | 5 katas (exchange-session RAII, tick buffer, intrusive order handle, seqlock quote publisher, lock-free SPSC feed pipe) — mechanics + concurrency for a low-latency trading platform, each concurrency kata carrying a TSan stress test |
+| Go | [`go-katas/`](go-katas/) | Go 1.22 · `testing` · `-race` | 15 katas + a staged drill (data races, goroutine leaks, channel discipline, lost updates, idempotency, fan-in backpressure, context propagation, graceful shutdown, streaming feed parsing, plus bigger ~60-min builds: matching engine, RabbitMQ-style bus, double-entry ledger, settlement pipeline) — concurrency correctness for a low-latency trading platform, each `solution/` carrying a `-race` stress test |
+| C++ | [`cpp-katas/`](cpp-katas/) | CMake · C++20 · hand-rolled harness · TSan | 6 katas (exchange-session RAII, tick buffer, intrusive order handle, seqlock quote publisher, lock-free SPSC feed pipe, streaming feed parser) — mechanics + concurrency for a low-latency trading platform, each concurrency kata carrying a TSan stress test |
 | Rust | [`rust-katas/`](rust-katas/) | Cargo · edition 2024 · `cargo test` · Miri | 13 katas — trading components, CS/Rust classics (LRU, thread pool, expression evaluator, pub/sub, `unsafe` SPSC ring under Miri), **and LLD scenarios** (connection pool with an RAII guard, circuit breaker, parking lot, vending machine) — drilling lifetimes, traits, enums/`match`, iterators, RAII & concurrency |
 | Python | [`python-katas/`](python-katas/) | Python 3.11+ · pytest · ruff | 8 LLD **scenarios** (real systems, not from-scratch drills): spreadsheet/formula engine, in-memory KV store (TTL + transactions), market-data stream aggregator, middleware pipeline, async fetch orchestrator, order state machine, notification service, in-memory file system — each drilling a senior Python idiom (data model, context managers, generators, decorators, asyncio, `match`, Protocols) |
+
+A shared **feed parser** kata — stream a pipe-delimited `SYMBOL|BID|ASK|QTY` market-data feed into
+typed quotes, lazily, reporting malformed lines by line number — now appears in **every language**
+(Go, Java, C#, C++, Python, and Rust's `tickparser`). It's the one "Rosetta" kata: identical
+behaviour, wildly different idioms — `bufio.Scanner`, a lazy `Stream`, `ReadOnlySpan<char>`,
+`string_view` + `from_chars`, a generator, and a zero-copy `&str`.
 
 _More languages will sit alongside as `<lang>-katas/`._
 

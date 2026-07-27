@@ -35,6 +35,7 @@ is `ruff`. Standard library only.
 | 6 | [`workflow`](practice/workflow/) | An order-lifecycle state machine with guarded transitions. *(trading)* | Enums + `match`/`case` structural pattern matching, frozen dataclasses |
 | 7 | [`notifier`](practice/notifier/) | A notification service: topic subscriptions + filters + pluggable channels. | Protocols (structural typing) + the Observer pattern |
 | 8 | [`filesystem`](practice/filesystem/) | An in-memory file system: `mkdir -p`, `write`, `read`, `ls`, `find`, `mv`. | Recursion over a tree + dunder (`__contains__`) + dataclasses |
+| 9 | [`feedparser`](practice/feedparser/) | A market-data feed reader: parse a `SYMBOL\|BID\|ASK\|QTY` text stream into typed quotes, lazily, with per-line error reporting. *(trading)* | Generators / lazy streaming, `yield`, data-carrying errors |
 
 Each `practice/<kata>/README.md` is the prompt: scenario → problem → requirements (the system's rules)
 → what you implement → the real challenge → run → reference + extension.

@@ -10,6 +10,7 @@ add_library(practice_compile OBJECT
   order_handle/compile_check.cpp
   top_of_book/compile_check.cpp
   feed_pipe/compile_check.cpp
+  feed_parser/compile_check.cpp
 )
 target_link_libraries(practice_compile PRIVATE katas_common)
 target_include_directories(practice_compile PRIVATE
@@ -18,4 +19,5 @@ target_include_directories(practice_compile PRIVATE
   order_handle
   top_of_book
   feed_pipe
+  feed_parser
 )
