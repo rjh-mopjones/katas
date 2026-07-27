@@ -297,9 +297,12 @@ deliberate mix (do NOT make every kata trading-themed). Same two-tree model, spl
   "stdlib only" story. Each solution module ends in a `#[cfg(test)] mod tests`. Per-kata folder =
   directory module so the practice `README.md` sits beside `mod.rs` (the compiler ignores the `.md`).
 - **Scenario framing is mandatory, theme is not:** each kata maps to a real senior "implement-in-an-
-  hour" ask; ~half are trading components, ~half are plain CS/Rust classics (a calculator, an LRU
-  cache — NO forced trading dressing). Lead each README with a `>` scenario and defer the language
-  depth to "The real challenge". Money angle only on the trading katas.
+  hour" ask across three flavours — **trading** components, plain **CS/Rust classics** (a calculator,
+  an LRU cache — NO forced trading dressing), and real-world **LLD scenarios** (connection pool,
+  circuit breaker, parking lot, vending machine, like `java-katas`). Lead each README with a `>`
+  scenario and defer the language depth to "The real challenge". Prefer a real *system* over a bare
+  "implement primitive X" drill where you can (the RAII connection pool over "implement a `Drop`
+  guard"). Money angle only on the trading katas.
 - **Skeleton body idiom:** `todo!()`. A crate of `todo!()` bodies still compiles (it is `!`, coerces
   anywhere), so `cargo build -p practice` is the compile-gate. Copy fixture/domain types (structs,
   enums, provided scaffolding) **verbatim**; keep public signatures identical; prefix otherwise-unused

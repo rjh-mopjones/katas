@@ -1,10 +1,11 @@
 # Rust Katas
 
 Senior-level Rust katas: the open-ended "implement this in ~an hour" tasks a Rust interview actually
-asks. **Half** are components of a low-latency trading platform; **half** are the canonical CS/Rust
-classics (an LRU cache, a thread pool, an expression evaluator, a pub/sub bus). Each maps to a real
-interview ask and drills a signature Rust topic — ownership & lifetimes, traits & dispatch, enums &
-pattern matching, iterators, and concurrency.
+asks. They come in three flavours — components of a low-latency **trading** platform; the canonical
+CS/Rust **classics** (LRU cache, thread pool, expression evaluator, pub/sub bus); and real-world
+**LLD scenarios** (connection pool, circuit breaker, parking lot, vending machine) like the Java
+module's. Each maps to a real interview ask and drills a signature Rust topic — ownership & lifetimes,
+traits & dispatch, enums & pattern matching, iterators, RAII, and concurrency.
 
 > **Write your own tests.** The `practice/` side ships *without* tests on purpose — designing them
 > (including the gated concurrency stress tests) is part of the exercise. The `solution/` twin carries
@@ -38,6 +39,10 @@ tests gate their threads with `std::sync::Barrier` (the analogue of Go's `close(
 | 7 | [`positionbook`](practice/src/positionbook/) | Trading | "thread-safe shared state, no deadlock" | **`Arc<Mutex>`**: lost-update + deadlock-free lock ordering |
 | 8 | [`orderstate`](practice/src/orderstate/) | Trading | "model a state machine" | **Enums + exhaustive `match`**, custom errors, typestate |
 | 9 | [`spscring`](practice/src/spscring/) *(unsafe capstone)* | Trading | "lock-free ring / atomics" | **`unsafe`**: `UnsafeCell` + atomics, `Send`/`Sync`, **Miri**-verified |
+| 10 | [`connpool`](practice/src/connpool/) | LLD scenario | "design a connection pool" | **RAII**: a borrow guard whose `Drop` returns the connection; `Condvar` blocking |
+| 11 | [`circuitbreaker`](practice/src/circuitbreaker/) | LLD scenario | "design a circuit breaker" | **Enum state machine** + thread-safe `Mutex` state + injected clock |
+| 12 | [`parkinglot`](practice/src/parkinglot/) | LLD scenario | "design a parking lot" | **Enums + exhaustive `match`** for fit rules, best-fit, ticket-as-capability |
+| 13 | [`vending`](practice/src/vending/) | LLD scenario | "design a vending machine" | **Enum state machine** + data-carrying error enum + greedy change |
 
 Each `practice/src/<kata>/README.md` is the prompt: scenario → problem → requirements → what you
 implement → the real challenge → run → reference + extension.

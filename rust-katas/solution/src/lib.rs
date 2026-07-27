@@ -8,10 +8,14 @@
 
 pub mod calc;
 pub mod candles;
+pub mod circuitbreaker;
+pub mod connpool;
 pub mod eventbus;
 pub mod lru;
 pub mod orderstate;
+pub mod parkinglot;
 pub mod positionbook;
 pub mod spscring;
 pub mod threadpool;
 pub mod tickparser;
+pub mod vending;
