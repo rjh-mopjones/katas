@@ -51,6 +51,13 @@ mvn test                 # everything
 | `scheduler` | delay-queue task scheduler |
 | `lockfree` | Treiber stack, Michael-Scott queue, ABA-safe stack |
 | `feedparser` | lazy Stream feed parsing, sealed result type, line-numbered errors |
+| `arbitrage` | cross-book arbitrage detection + equal-payout stake sizing |
+| `topk` | top-K over a stream, TreeSet + map re-ranking, deterministic tie-break |
+| `overround` | bookmaker overround / de-vig (proportional, additive, power methods) |
+| `oddsconverter` | decimal/fractional/American odds + implied probability, exact `BigDecimal` |
+| `slidingwindow` | rolling count/sum/weighted-avg over a time window, per-ms buckets, bounded memory |
+| `positionkeeper` | betting-book position & worst-case liability, per-market locking |
+| `quotecache` | TTL quote cache (time-based expiry, injected clock, concurrent) |
 
 > **IntelliJ:** after the restructure, re-import the Maven project (open `pom.xml` as project, or
 > *Maven tool window → Reload*) so both modules are recognised.
