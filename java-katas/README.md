@@ -58,6 +58,14 @@ mvn test                 # everything
 | `slidingwindow` | rolling count/sum/weighted-avg over a time window, per-ms buckets, bounded memory |
 | `positionkeeper` | betting-book position & worst-case liability, per-market locking |
 | `quotecache` | TTL quote cache (time-based expiry, injected clock, concurrent) |
+| `hashmap` | hash map from scratch — separate chaining, load factor, resize + rehash |
+| `ringbuffer` | bounded array-backed ring buffer (wrap-around, full/empty disambiguation) |
+| `heap` | binary heap / priority queue — array-backed sift-up/down, comparator, heapify |
+| `dynamicarray` | growable array (ArrayList) — amortized doubling, arraycopy shifts |
+| `money` | immutable `Money` value type — equals/hashCode/Comparable contract |
+| `blotter` | Streams & Collectors depth — multi-level groupingBy, partitioningBy, teeing |
+| `pipeline` | generic pipeline — bounded wildcards / PECS, type erasure |
+| `lease` | AutoCloseable resource lease — try-with-resources, suppressed exceptions |
 
 > **IntelliJ:** after the restructure, re-import the Maven project (open `pom.xml` as project, or
 > *Maven tool window → Reload*) so both modules are recognised.
