@@ -1,4 +1,5 @@
 package org.kata.circuitbreaker;
 
-public class CircuitBreaker {
+public enum State {
+    
 }

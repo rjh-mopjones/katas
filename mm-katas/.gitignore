@@ -1,0 +1,3 @@
+target/
+.kata-state/
+*.class

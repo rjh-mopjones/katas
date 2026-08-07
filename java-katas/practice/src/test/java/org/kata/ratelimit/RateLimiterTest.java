@@ -1,4 +1,4 @@
 package org.kata.ratelimit;
 
-public interface RateLimiter {
+public class RateLimiterTest {
 }

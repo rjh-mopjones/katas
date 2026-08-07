@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# mm-katas runner: a stopwatch that reveals one stage at a time.
+#
+#   ./kata              list the katas
+#   ./kata 01           start kata 01 (prints Stage 1 spec + starts the clock); re-run to see progress
+#   ./kata 01 check     run the current stage's tests; on green, unlock + reveal the next stage
+#   ./kata 01 reset     clear progress and re-lock stages 2+
+#
+# Later stages are @Disabled and revealed only as you pass the current one — no peeking ahead.
+set -euo pipefail
+cd "$(dirname "$0")"
+STATE=.kata-state
+mkdir -p "$STATE"
+
+die() { echo "error: $*" >&2; exit 1; }
+
+kata_slug() { basename "$(ls -d "src/main/java/com/katas/k${1}_"* 2>/dev/null | head -1)" 2>/dev/null || true; }
+readme_of() { echo "src/main/java/com/katas/$1/README.md"; }
+testfile()  { echo "src/test/java/com/katas/$1/Stage${2}Test.java"; }
+max_stage() { ls "src/test/java/com/katas/$1"/Stage*Test.java 2>/dev/null | sed 's#.*/Stage##; s#Test.java##' | sort -n | tail -1; }
+
+print_stage() { # slug N : print the "## Stage N — ..." section of the README
+  awk -v n="$2" '
+    $0 ~ "^## Stage " n "( |—|$)" {p=1; print; next}
+    p && /^## / {exit}
+    p {print}
+  ' "$(readme_of "$1")"
+}
+
+fmt() { printf '%dm %02ds' $(( $1 / 60 )) $(( $1 % 60 )); }
+
+# set_locked FILE true|false — true: @Disabled active (locked/skipped); false: commented out (runs).
+set_locked() {
+  local f="$1"
+  if [ "$2" = true ]; then
+    sed -i.bak -E 's#^// @Disabled\(#@Disabled(#' "$f" && rm -f "$f.bak"
+  else
+    sed -i.bak -E 's#^@Disabled\(#// @Disabled(#' "$f" && rm -f "$f.bak"
+  fi
+}
+lock_from() { # slug FROM : lock every stage >= FROM
+  local slug=$1 from=$2 max; max=$(max_stage "$slug")
+  for s in $(seq "$from" "$max"); do set_locked "$(testfile "$slug" "$s")" true; done
+}
+
+cmd_list() {
+  echo "mm-katas — market-making live-coding drills"
+  for d in src/main/java/com/katas/k*_*/; do
+    slug=$(basename "$d"); nn=${slug#k}; nn=${nn%%_*}
+    title=$(sed -n 's/^# Kata [0-9]* · //p' "$(readme_of "$slug")" | head -1)
+    echo "  $nn  $title"
+  done
+  echo
+  echo "start one with:  ./kata NN"
+}
+
+cmd_start() {
+  local nn=$1 slug=$2 sf="$STATE/k$1"
+  if [ -f "$sf" ]; then
+    local stage start; stage=$(sed -n 's/^stage=//p' "$sf"); start=$(sed -n 's/^start=//p' "$sf")
+    echo "kata $nn — on Stage $stage (elapsed $(fmt $(( $(date +%s) - start )) ))"
+    echo; print_stage "$slug" "$stage"; echo
+    echo "run ./kata $nn check  when the Stage $stage tests pass."
+  else
+    lock_from "$slug" 2   # clean initial condition: only Stage 1 runs
+    printf 'start=%s\nstage=1\n' "$(date +%s)" > "$sf"
+    echo "=== kata $nn · Stage 1 · clock started ==="
+    echo; print_stage "$slug" 1; echo
+    echo "run ./kata $nn check  when Stage 1 is green."
+  fi
+}
+
+cmd_check() {
+  local nn=$1 slug=$2 sf="$STATE/k$1"
+  [ -f "$sf" ] || die "kata $nn not started — run: ./kata $nn"
+  local stage start; stage=$(sed -n 's/^stage=//p' "$sf"); start=$(sed -n 's/^start=//p' "$sf")
+  local elapsed=$(( $(date +%s) - start ))
+  export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 21 2>/dev/null || true)}"
+
+  set_locked "$(testfile "$slug" "$stage")" false   # ensure the current stage actually executes
+  echo "running Stage $stage tests…"
+  local out; out=$(mvn -Dtest="com.katas.$slug.Stage${stage}Test" test 2>&1 || true)
+  local line; line=$(echo "$out" | grep -E 'Tests run: [0-9]+, Failures:' | tail -1)
+  local run fail err skip
+  run=$(echo "$line"  | sed -nE 's/.*Tests run: ([0-9]+).*/\1/p'); run=${run:-0}
+  fail=$(echo "$line" | sed -nE 's/.*Failures: ([0-9]+).*/\1/p'); fail=${fail:-0}
+  err=$(echo "$line"  | sed -nE 's/.*Errors: ([0-9]+).*/\1/p'); err=${err:-0}
+  skip=$(echo "$line" | sed -nE 's/.*Skipped: ([0-9]+).*/\1/p'); skip=${skip:-0}
+  local executed=$(( run - skip ))
+
+  if echo "$out" | grep -q 'BUILD SUCCESS' && [ "$executed" -ge 1 ] && [ "$fail" -eq 0 ] && [ "$err" -eq 0 ]; then
+    printf 'split_%s=%s\n' "$stage" "$elapsed" >> "$sf"
+    local max; max=$(max_stage "$slug")
+    echo "✓ Stage $stage passed — $executed tests, $(fmt "$elapsed") from start."
+    if [ "$stage" -lt "$max" ]; then
+      local next=$(( stage + 1 ))
+      set_locked "$(testfile "$slug" "$next")" false
+      sed -i.bak "s/^stage=.*/stage=$next/" "$sf" && rm -f "$sf.bak"
+      echo; echo "=== Stage $next unlocked ==="; echo
+      print_stage "$slug" "$next"; echo
+      echo "run ./kata $nn check  when Stage $next is green."
+    else
+      echo; echo "=== kata $nn COMPLETE — total $(fmt "$elapsed") ==="
+      grep '^split_' "$sf" | sed 's/split_/  stage /; s/=/: /' | while read -r l; do echo "$l s"; done
+      echo "  reference: solutions/$slug/"
+    fi
+  else
+    echo "✗ Stage $stage not passing yet ($executed run · $fail failed · $err errored · elapsed $(fmt "$elapsed"))."
+    echo "  see why:  mvn -Dtest='com.katas.$slug.Stage${stage}Test' test"
+  fi
+}
+
+cmd_reset() {
+  local nn=$1 slug=$2
+  rm -f "$STATE/k$1"
+  lock_from "$slug" 2
+  echo "kata $nn reset — stages 2+ re-locked."
+}
+
+main() {
+  [ $# -ge 1 ] || { cmd_list; exit 0; }
+  local nn; nn=$(printf '%02d' "$((10#$1))") || die "bad kata number: $1"
+  local slug; slug=$(kata_slug "$nn"); [ -n "$slug" ] || die "no kata $nn"
+  case "${2:-start}" in
+    start|"") cmd_start "$nn" "$slug" ;;
+    check)    cmd_check "$nn" "$slug" ;;
+    reset)    cmd_reset "$nn" "$slug" ;;
+    *)        die "unknown command '$2' (use: start | check | reset)" ;;
+  esac
+}
+main "$@"
