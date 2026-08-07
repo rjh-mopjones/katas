@@ -42,13 +42,6 @@ You design the internals: how you thread the physical line number through the st
 
 (`Quote`, `ErrorKind`, `ParseError` records/enum and the sealed `ParsedLine` — with `Ok`/`Err` — plus the `ParseSummary` record are provided as scaffolding.)
 
-## The real challenge
-- **Keep it lazy.** `Stream` has no element index, so thread the 1-based physical line number yourself — an `AtomicInteger` incremented once per input line inside the mapping step. This is only correct on an *ordered, sequential* pipeline: one increment per element in encounter order. Never `parallel()` this stream.
-- **Skip without losing position.** Blank/`#` lines emit *nothing* yet must still bump the counter, so a later error keeps its true physical line. `mapMulti` (emit zero-or-one per input) is a clean lazy way to drop the skipped lines; a `map`-then-`filter` of an `Optional` also works.
-- **`split("\\|", -1)` — the trailing-empty gotcha.** The default `split("\\|")` (limit 0) *discards trailing empty fields*: `"TOO|1.0|2.0|".split("\\|")` is length 3, silently swallowing a malformed trailing field. Use limit **-1** so the field count is exact and empty fields (including an empty symbol) survive. Escape the pipe (`"\\|"`) — a bare `|` is regex alternation.
-- **Errors are values.** Model each outcome as the sealed `ParsedLine` (`Ok` / `Err`) and handle both arms with an exhaustive `switch` — the compiler rejects a forgotten arm, so no outcome is ever dropped.
-- **Non-negative qty.** `Long.parseLong("-5")` succeeds and returns `-5`; the non-negative rule is a separate explicit guard, not a parse failure.
-
 ## Run
 There are no tests here — **write your own** under `src/test/java/org/kata/feedparser/` to drive your implementation, then:
 
@@ -57,8 +50,3 @@ mvn -pl practice test
 ```
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/feedparser/`
-- Java Interview Primer: Q90 (Streams / lazy pipelines), Q94 (`Collector`/reduction), sealed types & pattern matching (`switch` on sealed interfaces)
-- Extension: support a quoted/escaped `|` inside a symbol, or emit a running `Stream<ParseSummary>` snapshot; add an `Iterator`/`BufferedReader.lines()` source adapter for a live socket.

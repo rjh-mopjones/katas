@@ -22,13 +22,6 @@ Also implement `RetryPolicy.computeDelayMs(int attempt)` — the record componen
 
 (`RetryPolicy` record structure is provided as a working fixture.)
 
-## The real challenge
-- **Thundering-herd reasoning**: without jitter, all callers that fail at the same instant retry at the same instants, turning a transient outage into a sustained overload spike. Full jitter (`random(0, delay)`) maximally spreads retries across the delay window. Be able to explain this trade-off and name the three jitter strategies (full, equal, decorrelated).
-- **No sleep on last attempt**: computing a delay and sleeping only to immediately throw is wasted time. The check `if (attempt == maxAttempts) break` must happen before the sleep call.
-- **Cap before jitter**: `maxDelayMs` is applied to the raw exponential value; jitter is then applied to the capped value. Applying jitter before the cap could produce delays that inadvertently exceed `maxDelayMs`.
-- **Idempotency contract**: retrying a non-idempotent operation (e.g., charging a credit card) causes duplicate side-effects. A production retryer would accept a `Predicate<Exception>` to classify which exceptions are retryable — know this limitation even though this kata retries on any exception.
-- **Injectable sleeper**: `Thread.sleep` in production; a `List`-collecting `LongConsumer` in tests. This lets tests assert the exact delay sequence without the test suite taking real wall-clock time.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/retry/` to drive your
@@ -40,7 +33,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/retry/`
-- Java Interview Primer: Q235 (retry with backoff + jitter), resilience patterns

@@ -23,21 +23,6 @@ Implement `MyHashMap<K, V>` from scratch: the two constructors, `put`, `get`, `r
 `containsKey`. You design the bucket array, the collision strategy, the hash-to-index mapping, and the
 resize/rehash mechanics yourself.
 
-## The real challenge
-- **Separate chaining**: each bucket holds a singly-linked chain of entries; two keys landing in the
-  same bucket must both survive, distinguished by `equals`, never by hash alone.
-- **Spreading the hash**: `key.hashCode()` alone clusters badly when only its low bits vary. XOR-folding
-  the high bits into the low bits (`h ^ (h >>> 16)`) spreads that entropy before masking it down to an
-  index.
-- **Power-of-two capacity**: keeping capacity a power of two turns `hash % capacity` into
-  `hash & (capacity - 1)` — one AND instead of a division — but it is only correct if every resize also
-  lands on a power of two.
-- **Load factor and resize**: past 0.75 load, chains get long enough that lookups stop being O(1).
-  Resizing means allocating a bigger table and re-deriving every entry's bucket index against the new
-  capacity — get this wrong and entries silently vanish after a resize.
-- **The null key**: `null.hashCode()` throws, so `null` needs a special-cased hash (conventionally
-  bucket `0`) rather than falling through the normal `hashCode()` path.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/hashmap/` to drive your
@@ -49,7 +34,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/hashmap/`
-- Java Interview Primer: hashing / the `equals`-`hashCode` contract

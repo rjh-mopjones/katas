@@ -18,13 +18,6 @@ Implement `ConcurrentParkingLot` from scratch — the public API (`park`, `unpar
 
 (`ParkingLot` interface, `Spot` sealed hierarchy (`CompactSpot`, `StandardSpot`, `EVSpot`, `TruckSpot`), `Vehicle`, `VehicleType`, and `Ticket` are provided as fully working scaffolding.)
 
-## The real challenge
-- **Sealed spot hierarchy, not inheritance.** The instinctive design — `EVSpot extends StandardSpot` — violates the Liskov Substitution Principle: `EVSpot.fits` strengthens the precondition (rejects `CAR`) relative to `StandardSpot.fits`, so an `EVSpot` cannot substitute for a `StandardSpot`. Model the four spot types as sealed interface siblings instead — each answers its own `fits` predicate independently, and the compiler enforces exhaustive `switch` when you pattern-match.
-- **Best-fit, not first-fit.** First-fit wastes large bays on small vehicles. Sort candidates by `sizeRank` ascending and take the first available. This keeps truck bays free for trucks.
-- **Check-then-act inside the lock.** Between filtering candidates and acquiring a spot's lock, another thread may have taken that spot. Re-check `occupants.containsKey(spot.id())` inside the critical section — never outside.
-- **Per-spot locks, not a global lock.** A lot-wide lock serialises all parks across every bay for no benefit. Use one `ReentrantLock` per spot; a thread holds at most one lock at a time, so there is no deadlock risk.
-- **Ceiling billing without `double`.** `(milliseconds + 3_599_999) / 3_600_000` gives ceiling hours in pure integer arithmetic. Converting to `double` for `Math.ceil` introduces the very floating-point error `BigDecimal` was meant to prevent.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/parking/` to drive your
@@ -36,7 +29,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/parking/`
-- Java Interview Primer: Q85 (SOLID / LSP), Q79 (design patterns), Q38 (thread safety)

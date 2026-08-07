@@ -16,12 +16,6 @@ Implement a generic `Pipeline<T>` that batches elements, transforms them, and dr
 ## What you implement
 Implement `Pipeline<T>` from scratch — the public API is the static `create()`/`copy()` factories plus `addAll`, `map`, `drainTo`, and `toList`. You choose the internal storage and how `map` builds the new pipeline; the wildcard bounds on every signature above must stay exactly as given — get one direction wrong (e.g. `Collection<T>` instead of `Collection<? extends T>`) and the covariance/contravariance tests below won't even compile.
 
-## The real challenge
-- **Producer-extends**: `addAll` and the `src` side of `copy` only ever *read* from their argument — that's what licenses `? extends T`, and it's also what forbids writing into that argument (the compiler can't prove which subtype it actually holds).
-- **Consumer-super**: `drainTo` and the `dst` side of `copy` only ever *write into* their argument — that's what licenses `? super T`, and it's also what limits reading back out of it to `Object`.
-- **The invariant middle**: the backing storage for the pipeline's own elements should stay a plain `List<T>` — it's both read and written internally, so no wildcard alone would be sound there.
-- **Erasure**: you can't `new T[n]` — the JVM has nothing to reify at that array-creation site. Decide how that constrains your internal storage choice, and be ready to explain why a generic varargs factory (`T... items`) would need `@SafeVarargs` to compile cleanly.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/pipeline/` to drive your
@@ -33,7 +27,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/pipeline/`
-- Java Interview Primer: generics / bounded wildcards / PECS

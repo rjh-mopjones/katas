@@ -26,21 +26,6 @@ Implement `SlidingWindow` from scratch — the public API (`add` ×2, `count`, `
 `retainedBuckets`). You design the internal representation, the eviction strategy, and how reads stay
 O(1) as values expire.
 
-## The real challenge
-- **Key by time, not arrival order.** A naive design that evicts "from the head" of an arrival-ordered
-  queue assumes timestamps arrive monotonically — the first out-of-order event breaks it. Key by
-  timestamp (a `TreeMap<Long, aggregate>`) and order-of-arrival stops mattering: late-but-in-window
-  events merge, past-edge events are rejected, duplicates aggregate.
-- **Running totals.** Recomputing `sum`/`count` by scanning on every read is O(n). Maintain running
-  totals updated on every add and every eviction so reads are O(1) amortised — the value-sum and
-  weight-sum must expire **together** or the weighted average drifts.
-- **Bounded memory under high throughput.** Millions of events per second means you cannot keep one
-  object per event. Aggregate into **per-timestamp (or per-bucket) totals**, not raw events: a million
-  events in one millisecond collapse into a single bucket, so retention is O(window), not O(events).
-  Name the granularity/accuracy trade-off — 1 ms buckets stay exact; coarser buckets shrink memory but
-  blur to the bucket edge.
-- **Floating point.** Assert sums with a delta (`assertEquals(expected, actual, 1e-9)`), never `==`.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/slidingwindow/` to drive your
@@ -52,7 +37,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/slidingwindow/`
-- Java Interview Primer: Q30 (TreeMap / sorted maps), Q155 (PriorityQueue), Q48 (lazy vs eager eviction)

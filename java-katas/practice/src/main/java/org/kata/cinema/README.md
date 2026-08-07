@@ -19,13 +19,6 @@ Implement `ConcurrentSeatBookingService` from scratch — the public API (`hold`
 
 (`SeatBookingService` interface, `Seat`, `Hold`, `Booking`, and `Screening` are provided as fully working scaffolding.)
 
-## The real challenge
-- **Atomic check-and-act.** The conflict check (is any seat taken?) and the seat reservation (mark them held) must happen inside the same critical section. Any gap between check and act is a TOCTOU race that allows double-booking.
-- **Per-screening lock, not a global lock.** Two users booking different screenings should never contend. Partition state and locks by `screeningId`; use `ConcurrentHashMap.computeIfAbsent` to create per-screening state atomically.
-- **Secondary index for O(1) routing.** `confirm` and `release` receive only a `holdId`. Without a `holdId → screeningId` index you would scan every screening's state on every call. Maintain this index in lockstep with the primary hold state, inside the same critical section.
-- **Idempotent confirm.** Check `bookings.get(holdId)` before doing any work; return the existing `Booking` if found. This is the property that makes payment retries safe.
-- **Caller-supplied `now`.** The interface takes an `Instant` parameter rather than calling the system clock internally, making TTL expiry fully testable without `Thread.sleep` or clock stubs.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/cinema/` to drive your
@@ -37,7 +30,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/cinema/`
-- Java Interview Primer: Q38 (thread safety), Q78 (optimistic vs pessimistic locking), Q241 (atomic check-and-act)

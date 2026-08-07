@@ -17,12 +17,6 @@ Implement `PositionKeeper` from scratch — the public API is `apply(Bet)`, `pnl
 
 (`Bet` record and `Side` enum are provided as fully working scaffolding.)
 
-## The real challenge
-- **The payoff math collapses to running totals.** Don't replay bets on every read. Per market, track `backStakeTotal`, `layStakeTotal`, and per-selection `backOddsStake[sel] = Σ stake*odds` / `layOddsStake[sel] = Σ stake*odds` for back/lay bets on `sel`. Then `pnlIfWins(w) = (backOddsStake[w] - backStakeTotal) + (layStakeTotal - layOddsStake[w])` — O(1) per read regardless of bet history length.
-- **Worst case includes the "other outcome".** The candidate outcomes for `worstCaseLiability` are every selection actually bet on, plus the case where *none* of them wins (`pnl = layStakeTotal - backStakeTotal`). A pure-back book's worst case is usually that "other outcome" case, not any of the backed selections — a classic exchange risk trap if you only scan bet selections.
-- **Per-market locking is the right grain.** A live exchange runs many markets concurrently but each individual market sees comparatively few concurrent bets; guard each market's running totals with its own lock (not one global lock, not lock-free per-field, which risks torn reads across the four numbers).
-- **BigDecimal throughout.** Stakes, odds, and every derived total use `BigDecimal` with `compareTo` — never `==` or `double` — money arithmetic with binary floats silently corrupts real liability figures.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/positionkeeper/` to drive your
@@ -34,7 +28,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/positionkeeper/`
-- Java Interview Primer: Q48 (locks / `ConcurrentHashMap`), Q12 (`BigDecimal` for money)

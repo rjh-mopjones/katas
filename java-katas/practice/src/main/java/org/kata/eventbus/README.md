@@ -17,12 +17,6 @@ Implement an in-process event bus where subscribers register interest in a speci
 ## What you implement
 Implement `EventBus` from scratch — the public API is `subscribe(Class<T>, Consumer<T>)` (returns a `Subscription`) and `publish(Object)`. You design the internal handler registry, unsubscribe mechanism, and concurrent iteration strategy yourself. The `Subscription` interface (with its single `unsubscribe()` method) is provided as a working type.
 
-## The real challenge
-- **`CopyOnWriteArrayList` for safe concurrent iteration**: `publish` iterates the handler list while `subscribe`/`unsubscribe` may mutate it concurrently. `CopyOnWriteArrayList` takes a snapshot of the backing array at iteration start, so modifications during publish are never visible to that iteration — no lock needed during delivery.
-- **Unsubscribe identity**: `subscribe` captures the `HandlerEntry` object in the returned lambda. `CopyOnWriteArrayList.remove(Object)` uses `equals()`; `HandlerEntry` is a record so equality is structural. Lambdas do not implement value equality — two registrations of the same lambda reference produce two distinct `HandlerEntry` objects — so `remove(entry)` removes exactly the right one even when the same handler is subscribed twice.
-- **Error isolation**: wrapping each handler invocation in try/catch and continuing is essential. Stopping on the first failure would silently starve all remaining subscribers — the kind of bug that is invisible in tests with only one handler per type.
-- **Type dispatch via `getClass()`**: dispatch is on the concrete runtime type, not the declared compile-time type. Handlers for `Animal.class` do not receive a `Dog` event.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/eventbus/` to drive your
@@ -34,7 +28,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/eventbus/`
-- Java Interview Primer: Q82 (Observer), Q188 (Spring events), Q33 (fail-safe iterators / CopyOnWriteArrayList)

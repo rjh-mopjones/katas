@@ -17,12 +17,6 @@ Implement a generic pool that manages a fixed maximum number of reusable resourc
 ## What you implement
 Implement `ConnectionPool<R>` from scratch — the public API is two constructors (`factory + maxSize`, and `factory + maxSize + validator`), `borrow(long, TimeUnit)`, `release(R)`, `available()`, and `inUse()`. You design the internal resource tracking, bounding mechanism, and validation loop yourself.
 
-## The real challenge
-- **Semaphore as the bound**: the semaphore models "slots available" cleanly — `tryAcquire(timeout, unit)` blocks until a slot opens or the deadline elapses. Without it, you would have to manually count in-flight borrows and coordinate that count with the idle queue.
-- **Release order matters**: in `release`, add the resource to the idle queue _before_ releasing the semaphore permit. If you release the permit first, another thread can acquire it and find the idle queue empty, causing it to create an extra resource beyond `maxSize`.
-- **Validate-on-borrow loop**: after acquiring a permit, you may pull an invalid idle resource; you must discard it and try again (or create fresh), all while holding exactly one permit.
-- **Lazy creation vs idle-queue empty**: an empty idle queue after a successful `acquire` means create a new resource only if `totalCreated < maxSize` — the semaphore's available permits encode this invariant.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/connectionpool/` to drive your
@@ -34,7 +28,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/connectionpool/`
-- Java Interview Primer: Q191 (HikariCP sizing), Q48 (semaphores)

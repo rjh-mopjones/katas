@@ -17,13 +17,6 @@ Bookmakers quote the same price three different ways depending on market and reg
 ## What you implement
 Implement `OddsConverter` from scratch — the public API is the six conversion methods above, all working over `java.math.BigDecimal`. `Fractional` is provided as a fixture (a validated `record`); you don't need to change it. You choose the rounding scale/mode and the fractional-reduction algorithm.
 
-## The real challenge
-- **`BigDecimal`, never `double`, for every odds/probability value.** Odds and probabilities are fractions with no exact binary representation — `1.0/3.0` in floating point compounds drift across repeated conversions, and a bookmaker rounding a price the wrong way, at volume, is a real money leak. Compare `BigDecimal`s with `compareTo`, never `equals` — `equals` is scale-sensitive (`2.50` and `2.5` are not `.equals()`).
-- **Pick and document one rounding policy.** A fixed scale (e.g. 4 decimal places) and `RoundingMode.HALF_UP` applied consistently is what lets a decimal → fractional → decimal round trip land back where it started (within a small tolerance) instead of drifting with every hop.
-- **Reduce the fraction exactly, not by float-casting.** Read the `BigDecimal` as an exact integer ratio (`unscaledValue / 10^scale`) and divide both terms by their GCD — that is how `2.50` (from `3.50 - 1`) becomes `250/100` and reduces to `5/2` without ever approximating.
-- **The even-money boundary is a real edge case, not a rounding accident.** Decimal `2.0`, fractional `1/1`, American `+100`, and probability `0.5` all name the same coin-flip price — get the `>= 2.0` boundary in `americanFromDecimal` wrong and even money silently reports as a negative line instead of `+100`.
-- **Validate every entry point.** `decimalOdds <= 1`, `p` outside `(0, 1)`, and `american == 0` are all real user input a UI or feed could hand you — reject them at the boundary, not three calculations downstream.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/oddsconverter/` to drive your
@@ -35,7 +28,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/oddsconverter/`
-- Java Interview Primer: Q112 (`BigDecimal` vs `double`, rounding modes)

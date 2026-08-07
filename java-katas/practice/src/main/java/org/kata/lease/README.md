@@ -16,12 +16,6 @@ Implement a single-threaded pool that lends out a fixed number of resources, one
 ## What you implement
 Implement `Pool<R>` and `Lease<R>` from scratch — the public API is `Pool`'s constructor, `acquire()`, `available()`, and `Lease`'s `get()` and `close()`. You design how a `Lease` finds its way back to its `Pool`, how idle resources are tracked and reused, and how the idempotent-close guard works.
 
-## The real challenge
-- **Deterministic cleanup, not "remember to call close()".** A caller's code between acquire and close can throw. The resource must still come back to the pool — that's the entire reason try-with-resources exists, and it's what your tests should prove, not just assume.
-- **Idempotent close.** Nested or defensive cleanup code routinely calls `close()` more than once; `AutoCloseable`'s contract expects a second call to be harmless. Get this wrong and two callers can end up believing they each hold the same "exclusive" resource.
-- **Suppressed exceptions.** When a try-with-resources body throws and a resource's `close()` *also* throws while unwinding, the JVM doesn't discard either — the close-time exception is attached to the body's exception via `addSuppressed`. `FaultyResource` exists so you can watch this happen and read it back off `getSuppressed()`.
-- **Reuse, not just recycling the count.** A resource returned to the pool should be handed out again on a later `acquire()`, not silently dropped in favour of always calling the factory — otherwise "pooling" is just an expensive way to count.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/lease/` to drive your
@@ -33,7 +27,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/lease/`
-- Java Interview Primer: try-with-resources / `AutoCloseable` / suppressed exceptions

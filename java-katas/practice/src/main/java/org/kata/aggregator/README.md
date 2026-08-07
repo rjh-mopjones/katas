@@ -15,12 +15,6 @@ Build a `ScatterGather` class that accepts an injected `Executor` and a list of 
 ## What you implement
 Implement `ScatterGather` from scratch — the public API is a no-arg constructor, a constructor accepting an `Executor`, `gatherAll(List<Supplier<T>>)`, and `gatherAllWithTimeout(List<Supplier<T>>, Duration)`. You design the scatter, barrier, and gather logic yourself.
 
-## The real challenge
-- **`allOf` returns `Void`**: `CompletableFuture.allOf(...)` gives you a barrier that fires when all futures complete, but it holds no results. You must keep a reference to the original individual futures and collect their results after the barrier — a common interview stumbling block.
-- **`gatherAllWithTimeout` partial results**: wrap each future with `.orTimeout(...)`, then chain `.handle((v, ex) -> ex == null ? Optional.of(v) : Optional.empty())`. The `handle` absorbs exceptions so `allOf` itself never fails; after the barrier you filter for `Optional.isPresent()`. Using `orTimeout` (exceptional on timeout) rather than `completeOnTimeout` (sentinel value) avoids inventing a meaningful default.
-- **Keeping tasks lazy**: accept `Supplier<T>`, not pre-built `CompletableFuture<T>`. Pre-built futures start immediately on the caller's thread; suppliers start on your executor when you call `supplyAsync`.
-- **Executor injection**: tests inject a controlled executor to verify parallelism and lifecycle. The production default of virtual threads requires no pool sizing.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/aggregator/` to drive your
@@ -32,7 +26,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/aggregator/`
-- Java Interview Primer: Q50 (CompletableFuture), Q168 (CF exception handling), Q243 (scatter-gather)

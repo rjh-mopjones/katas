@@ -16,12 +16,6 @@ Implement a generic queue with a fixed maximum capacity, backed by a single arra
 ## What you implement
 Implement `RingBuffer<E>` from scratch — the public API is the constructor plus `offer`, `poll`, `peek`, `size`, `isEmpty`, `isFull`, and `capacity`. You design the internal cursor arithmetic and the full/empty disambiguation yourself.
 
-## The real challenge
-- **Modular wrap-around**: both the head and tail cursors advance mod `capacity`, wrapping back to index `0` when they run off the end of the array — get the wrap-around index math right in both `offer` and `poll`.
-- **Full vs. empty ambiguity**: with only a head and tail cursor, `head == tail` means either "completely empty" or "completely full" — you need a third signal (a count, or burning one array slot) to tell them apart.
-- **No element loitering**: nulling out a slot after `poll` avoids pinning a polled object's reference from a stale array cell.
-- **Generic array creation**: `new E[capacity]` doesn't compile (type erasure) — back the buffer with `Object[]` and cast on read, documenting why the cast is safe.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/ringbuffer/` to drive your
@@ -33,7 +27,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/ringbuffer/`
-- Java Interview Primer: `ArrayDeque` internals / circular buffers

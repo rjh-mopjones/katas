@@ -17,12 +17,6 @@ Implement `InMemoryAccountService` and `ConcurrentAccountService` from scratch �
 
 (`Account` record and `AccountService` interface are provided as fully working scaffolding.)
 
-## The real challenge
-- **Deadlock-free transfer via monotonic lock ordering.** Acquiring two locks for a transfer is unavoidable; the order must be globally consistent regardless of direction. Canonicalise by comparing `UUID`s: always lock `min(from, to)` first, then `max(from, to)`. This eliminates the cycle in the lock-acquisition graph that causes deadlock.
-- **`computeIfAbsent` for per-account lock creation.** Two threads racing to open the same account must share one lock, not silently create two. `ConcurrentHashMap.computeIfAbsent` provides this atomically.
-- **`BigDecimal`, not `double`, for money.** IEEE-754 cannot represent most decimal fractions exactly; pennies leak into rounding errors. Use `BigDecimal` and `signum()` for zero/negative checks.
-- **Unlock in `finally`.** An exception inside the critical section must not leave the lock permanently held.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/bank/` to drive your
@@ -34,7 +28,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/bank/`
-- Java Interview Primer: Q39 (synchronized block vs method), Q40 (deadlock), Q130 (BigDecimal for money)

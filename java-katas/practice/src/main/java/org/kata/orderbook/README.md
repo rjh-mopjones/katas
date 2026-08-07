@@ -20,13 +20,6 @@ Implement `OrderBook` from scratch — the public API (`submit`, `cancel`, `best
 
 (`Order` record, `Trade` record, and `Side` enum are provided as fully working scaffolding.)
 
-## The real challenge
-- **Data structure choices.** Bids use a reverse-ordered `TreeMap` so `firstEntry()` is always the best (highest) bid. Asks use natural-order `TreeMap` so `firstEntry()` is always the best (lowest) ask. Each price level holds an `ArrayDeque<Order>` — `peek`/`poll` at the head give FIFO in O(1), and de-duplication of price levels is automatic.
-- **Flat id index for cancellation.** The deque-of-orders layout is optimal for matching but O(n) to search by id. A parallel `UUID → Order` map makes `cancel` O(log p) (one TreeMap lookup for the price level) rather than a full book scan.
-- **Partial fill bookkeeping.** When a resting order is partially consumed, replace the head of the deque with a new `Order` instance (via `withQty`) — do not mutate in place. The order keeps its original timestamp and stays at the front; only the quantity changes.
-- **Single-writer lock.** Each fill changes book state, and the very next match decision depends on that change. Fine-grained per-level locking adds contention without benefit here. One `ReentrantLock` for the whole book is the correct trade-off.
-- **`BigDecimal` for prices.** Binary float rounding in a matching engine accumulates into real P&L errors. Always use `BigDecimal` and `compareTo`, never `==` or `double` arithmetic.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/orderbook/` to drive your
@@ -38,7 +31,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/orderbook/`
-- Java Interview Primer: Q30 (TreeMap/sorted maps), Q31 (Comparable/Comparator), Q155 (PriorityQueue)

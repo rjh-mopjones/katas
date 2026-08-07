@@ -17,13 +17,6 @@ Services that depend on a downstream system (database, external API) must stop h
 ## What you implement
 Implement `CircuitBreaker` from scratch — the public API is `state()`, `call(Callable<T>)`, and two constructors (with and without an injectable `LongSupplier` clock). You design the internal state machine, locking strategy, and all transitions yourself. `CircuitOpenException` (the exception thrown when the breaker is OPEN) and the `State` enum (`CLOSED`, `OPEN`, `HALF_OPEN`) are provided as fully working types.
 
-## The real challenge
-- **Lock scope**: acquire the lock to check state and decide whether to invoke the action; release before calling the action; re-acquire to record the outcome. Holding the lock during the action would serialise all concurrent calls and eliminate the concurrency benefit.
-- **State captured at call time**: `recordSuccess`/`recordFailure` receive the state observed when the call was dispatched, not the current state. This avoids a race where another thread trips the breaker between the action returning and the outcome being recorded.
-- **`HALF_OPEN` failure is immediate**: any single failure in `HALF_OPEN` reopens the breaker and resets the open timer — there is no grace period.
-- **Time-based transition is lazy**: `OPEN → HALF_OPEN` is only evaluated when `call()` or `state()` is invoked, not on a background timer. `maybeTransitionToHalfOpen()` must be called under the lock at both entry points.
-- **Consecutive count vs rolling window**: this implementation counts consecutive failures (one success resets the counter). A rolling failure-rate window (e.g., Resilience4j's sliding window) is more nuanced but more complex — know the trade-off.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/circuitbreaker/` to drive your
@@ -35,7 +28,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/circuitbreaker/`
-- Java Interview Primer: Q234 (circuit breaker), Q50 (CompletableFuture context), resilience patterns

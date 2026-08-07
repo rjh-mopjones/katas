@@ -20,12 +20,6 @@ Implement `LruCache`, `LfuCache`, and `ConcurrentLruCache` from scratch — the 
 
 (`Cache` is provided as a working fixture.)
 
-## The real challenge
-- **LRU in O(1)**: requires a `HashMap<K, Node>` combined with an intrusive doubly-linked list. The map provides O(1) lookup directly to the list node; the doubly-linked list provides O(1) unlink from any interior position. A singly-linked list cannot unlink an arbitrary node in O(1). Sentinel head/tail nodes eliminate null-pointer edge cases at the boundaries.
-- **LFU in O(1)**: naive "scan for minimum frequency" is O(n). The O(1) trick: maintain a `Map<Integer, LinkedHashSet<K>>` from frequency to ordered key set, plus a `minFreq` scalar. Eviction is always `freqToKeys.get(minFreq).first()`. The hardest part is keeping `minFreq` correct: it resets to 1 on every new insertion; on a promotion it increments by 1 only if the old bucket is now empty and was the minimum.
-- **Why `get` is not read-only in LRU**: every cache hit mutates the recency list (move-to-front). This means a `ReadWriteLock` cannot help — all callers need the write lock, making fine-grained locking impractical. A single `ReentrantLock` is the correct, simple approach.
-- **`LinkedHashSet` for LFU tie-breaking**: insertion order within a frequency bucket gives LRU tie-breaking for free. A plain `HashSet` would make tie-breaking arbitrary; a `TreeSet` would add O(log n) cost.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/cache/` to drive your
@@ -37,7 +31,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/cache/`
-- Java Interview Primer: Q96 (caching), Q154 (WeakHashMap/eviction), Q303

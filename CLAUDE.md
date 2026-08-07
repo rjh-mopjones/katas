@@ -40,6 +40,11 @@ Rules that hold across languages:
   mvn test                   # everything
   ```
 - **Package root:** `org.kata.<kata>`.
+- **Two READMEs per kata (java-katas standard):** `practice/.../README.md` is the **spoiler-free prompt**
+  (problem · requirements · what-you-implement API · run) — it must NOT reveal the data structures,
+  locking, or algorithm. `solution/.../README.md` is the **answer key** (Approach · The real challenge ·
+  Common mistakes & senior signal · Extensions · Reference) — read after attempting. The design hints
+  live only in the solution README + the code Javadoc, never in the prompt.
 - **Tests** (the reference suite in `solution/`, and ones you write in `practice/`): JUnit Jupiter
   5.11.3 ONLY — no Mockito, no AssertJ. Use `org.junit.jupiter.api.Test` + `Assertions.*`.
   Descriptive `snake_case` names. Concurrency tests use a `CountDownLatch` gate + done with
@@ -63,9 +68,13 @@ Rules that hold across languages:
      declaration + every non-`private` constructor/method signature with body
      `throw new UnsupportedOperationException();`. Delete Javadoc, fields, private methods, and
      private nested types (keep a public nested type only if a kept signature needs it).
-5. Add `practice/src/main/java/org/kata/<name>/README.md`: problem, requirements, *what you
-   implement* (the public contract only), the real challenge, the run note (write your own tests),
-   primer pointers.
+5. Add the **two READMEs** (spoiler-free prompt vs answer key — see below):
+   - `practice/src/main/java/org/kata/<name>/README.md` = the **prompt** an interviewer would hand you:
+     `# Title` · `> scenario` · `## The problem` · `## Requirements` (the contract) ·
+     `## What you implement` (public API only) · `## Run` (write your own tests). **No design hints.**
+   - `solution/src/main/java/org/kata/<name>/README.md` = the **answer key** (read after attempting):
+     `## Approach` · `## The real challenge` · `## Common mistakes & senior signal` · `## Extensions` ·
+     `## Reference` (primer pointer). This is where the data-structure / locking / algorithm hints live.
 6. Verify: `mvn -pl practice test-compile` succeeds (the skeletons + fixtures compile).
 
 ---

@@ -25,14 +25,6 @@ Build three lock-free data structures without using `synchronized`, `ReentrantLo
 ## What you implement
 Implement `TreiberStack`, `MichaelScottQueue`, and `AtomicStampedStack` from scratch — the public API is `push`/`pop`/`isEmpty` for the stacks and `enqueue`/`dequeue`/`isEmpty` for the queue (all returning `Optional<E>` on removal). You design the node structure, atomic reference fields, and all CAS loops yourself.
 
-## The real challenge
-- **CAS-loop skeleton**: every mutating operation follows the same three steps — (1) volatile-read a snapshot, (2) compute the proposed next state (pure, no side-effects), (3) `compareAndSet` and return on success or retry on failure. Getting step (2) right — building a new node from a snapshot before the CAS — is the key insight.
-- **Michael-Scott two-CAS enqueue + helping**: enqueue requires one CAS to link the new node onto `tail.next` (the linearization point) and a second CAS to swing `tail` forward. Between these two CASes the structure is in an intermediate state. Any thread that observes `tail.next != null` must help advance `tail` before doing its own work — this is what makes the algorithm lock-free rather than merely obstruction-free.
-- **Dummy node invariant**: the queue always has a sentinel node whose item is ignored. `head` points to the dummy; the true first element is `head.next`. Dequeue makes `head.next` the new dummy. This eliminates the special case when the queue has exactly one real element.
-- **Consistency snapshot in Michael-Scott**: after reading `curTail` and `tailNext` separately, re-read `tail` to detect if another CAS fired between the two reads and restart with a fresh snapshot if it did.
-- **ABA with `AtomicStampedStack`**: use `head.get(stampHolder)` to read reference and stamp atomically. Each successful push or pop uses `oldStamp + 1` as `newStamp`. The four-argument `compareAndSet(expectedRef, newRef, expectedStamp, newStamp)` fails if either the reference or the stamp has changed — a recycled node with the same identity but a different generation is correctly rejected.
-- **Immutable nodes**: `Node.next` (in Treiber and AtomicStamped) and `Node.item` must be `final`. Immutability is not style — it is what makes reading `node.next` safe without a lock after the node is installed via CAS.
-
 ## Run
 
 There are no tests here — **write your own** under `src/test/java/org/kata/lockfree/` to drive your
@@ -44,7 +36,3 @@ mvn -pl practice test
 
 The reference tests in the `solution/` twin show one way to pin the behaviour — compare after you
 have your own attempt.
-
-## Reference
-- Worked solution: `solution/src/main/java/org/kata/lockfree/`
-- Java Interview Primer: Q256 (Treiber stack), Q257 (Michael-Scott queue), Q261 (ABA / AtomicStampedReference), Q49 (happens-before)
