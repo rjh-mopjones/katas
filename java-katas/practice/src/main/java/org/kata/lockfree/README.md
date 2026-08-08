@@ -3,27 +3,27 @@
 > Implement Treiber's stack, the Michael-Scott queue, and an ABA-safe stamped stack — the three canonical lock-free algorithms in Java concurrency interviews.
 
 ## The problem
-Build three lock-free data structures without using `synchronized`, `ReentrantLock`, or any blocking primitive. All thread-safety must come from `AtomicReference` and `AtomicStampedReference` CAS operations. Each structure must remain correct under arbitrary concurrent pushes, pops, enqueues, and dequeues — including when threads are preempted mid-operation.
+Build three lock-free data structures without using `synchronized`, `ReentrantLock`, or any blocking primitive. All thread-safety must come from CAS (compare-and-set) operations. Each structure must remain correct under arbitrary concurrent pushes, pops, enqueues, and dequeues — including when threads are preempted mid-operation.
 
 ## Requirements
 
-**`TreiberStack<E>`**
-- `push(E item)` adds to the top; rejects null.
-- `pop()` removes and returns the top as `Optional<E>`, or `Optional.empty()` if empty.
-- `isEmpty()` returns true iff the stack has no elements.
+**A lock-free stack (`TreiberStack`)**
+- Pushing an item adds it to the top; a null item is rejected.
+- Popping removes and returns the top item, or indicates emptiness if there is none.
+- Checking emptiness reports whether the stack currently has no elements.
 
-**`MichaelScottQueue<E>`**
-- `enqueue(E item)` appends to the tail; rejects null.
-- `dequeue()` removes and returns the head as `Optional<E>`, or `Optional.empty()` if empty.
-- `isEmpty()` returns true iff the queue has no real elements.
-- Must use a dummy (sentinel) node and implement cooperative tail-advancing (helping).
+**A lock-free queue (`MichaelScottQueue`)**
+- Enqueuing an item appends it to the tail; a null item is rejected.
+- Dequeuing removes and returns the head item, or indicates emptiness if there is none.
+- Checking emptiness reports whether the queue currently has no real elements.
+- Must use a dummy (sentinel) node internally and implement cooperative tail-advancing (helping) so a lagging tail pointer never blocks another thread's progress.
 
-**`AtomicStampedStack<E>`**
-- Same API as `TreiberStack`.
-- Every successful push or pop must increment the monotonic stamp so that ABA is detectable — a stale CAS whose reference matches but whose stamp does not must fail and retry.
+**An ABA-safe stamped stack (`AtomicStampedStack`)**
+- Same behaviour as the lock-free stack above.
+- Every successful push or pop must increment a monotonic stamp so that ABA is detectable — a stale CAS whose reference matches but whose stamp does not must fail and retry.
 
-## What you implement
-Implement `TreiberStack`, `MichaelScottQueue`, and `AtomicStampedStack` from scratch — the public API is `push`/`pop`/`isEmpty` for the stacks and `enqueue`/`dequeue`/`isEmpty` for the queue (all returning `Optional<E>` on removal). You design the node structure, atomic reference fields, and all CAS loops yourself.
+## What you're given
+Nothing but the problem — you design the whole API and implementation, for all three structures, from scratch.
 
 ## Run
 

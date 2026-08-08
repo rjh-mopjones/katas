@@ -13,29 +13,27 @@ which selection wins, and that payout is strictly more than the total staked.
 
 ## Requirements
 
-- `bestOdds(quotes)` — the highest-odds `Quote` per selection across all books; ties broken by book
-  name ascending.
-- `bookSum(quotes, selections)` — `Σ (1/bestOdds)` over the given selections. If any selection has
-  no quote at all, the market is uncoverable — document how you signal that (this kata returns
-  `BigDecimal.ONE`, which reads as "no arbitrage").
-- `isArbitrage(quotes, selections)` — true iff every selection has a quote **and** `bookSum` is
-  strictly less than 1. Exactly `1.0` (break-even) is not an arbitrage.
-- `stakes(quotes, selections, totalStake)` — the stake per selection that equalises the payout
-  whichever selection wins. Decide what happens when there is no arbitrage (throw, or return
-  empty) and document it.
-- `guaranteedProfit(quotes, selections, totalStake)` — the riskless profit locked in by staking
-  `totalStake` across the arbitrage. Decide the no-arbitrage behaviour and document it.
+- Finding the highest-odds quote per selection across all books; ties broken by book name
+  ascending.
+- Summing the reciprocal of each selection's best odds across a given set of selections tells you
+  how coverable the market is. If any selection has no quote at all, the market is uncoverable —
+  document how you signal that (this kata treats it the same as a sum of exactly 1, which reads
+  as "no arbitrage").
+- Determining whether an arbitrage exists: true iff every selection has a quote **and** that
+  summed reciprocal is strictly less than 1. Exactly `1.0` (break-even) is not an arbitrage.
+- Sizing the stake per selection that equalises the payout whichever selection wins, given a total
+  stake to distribute. Decide what happens when there is no arbitrage (throw, or return empty) and
+  document it.
+- Computing the riskless profit locked in by staking a given total across the arbitrage. Decide
+  the no-arbitrage behaviour and document it.
 - Use `BigDecimal` and `compareTo` throughout — never `double` equality — for odds, stakes and
   the `< 1` / `== 1` comparisons.
 
-## What you implement
+## What you're given
 
-Implement `ArbitrageDetector` from scratch — the public API is `bestOdds(List<Quote>)`,
-`bookSum(List<Quote>, Set<String>)`, `isArbitrage(List<Quote>, Set<String>)`,
-`stakes(List<Quote>, Set<String>, BigDecimal)`, and
-`guaranteedProfit(List<Quote>, Set<String>, BigDecimal)`. `Quote` (a `book`/`selection`/`odds`
-record, with odds validated `> 1` in its compact constructor) is provided as a fixture. You design
-the internal comparison, summation, and stake-sizing arithmetic yourself.
+`Quote` (a `book`/`selection`/`odds` record, with odds validated `> 1` in its compact constructor)
+is provided as a fixture. You design the entire public API — method names, parameters, return
+types — and the internals from scratch.
 
 ## Run
 

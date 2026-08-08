@@ -17,7 +17,7 @@ The feed also contains noise: blank lines and `#` comments. After trimming, a bl
   4. ask not a `double` → `INVALID_ASK`
   5. qty not a **non-negative** `long` → `INVALID_QTY`
 - Every `ParseError` carries the **1-based physical line number** — counting *every* input line, including the skipped blank/comment lines.
-- `parse` must be **lazy**: map an input `Stream<String>` to a `Stream<ParsedLine>` without materialising either, so short-circuiting terminals (`findFirst`, `limit`) and unbounded sources work.
+- Parsing must be **lazy**: consume the input stream without materialising it, so short-circuiting terminals (`findFirst`, `limit`) and unbounded sources work.
 
 ### Canonical feed → expected output
 ```
@@ -33,14 +33,14 @@ NEG|1.0|2.0|-5             (line 8, INVALID_QTY)
 `quotes = [Quote("LIV-MUN",1.95,2.05,1000), Quote("ARS-CHE",1.50,1.60,500)]`
 `errors = [(5,EMPTY_SYMBOL),(6,INVALID_BID),(7,WRONG_FIELD_COUNT),(8,INVALID_QTY)]`
 
-## What you implement
-Implement `FeedParser` from scratch — the public API:
-- `static Stream<ParsedLine> parse(Stream<String> lines)` — the lazy mapping.
-- `static ParseSummary parseAll(Stream<String> lines)` — drain into `(List<Quote>, List<ParseError>)`.
+## What you're given
+Provided scaffolding (fixtures/domain types):
+- `Quote` — a parsed record (`symbol`, `bid`, `ask`, `qty`).
+- `ErrorKind` — the enum of failure reasons.
+- `ParseError` — a failure carrying its 1-based line number and `ErrorKind`.
+- `ParsedLine` — the sealed outcome interface, with `Ok` and `Err` variants.
 
-You design the internals: how you thread the physical line number through the stream, how you skip blank/comment lines while still counting them, and how you validate + coerce a line to a `ParsedLine`.
-
-(`Quote`, `ErrorKind`, `ParseError` records/enum and the sealed `ParsedLine` — with `Ok`/`Err` — plus the `ParseSummary` record are provided as scaffolding.)
+You design the entire public API — method names, parameters, return types — and the internals from scratch.
 
 ## Run
 There are no tests here — **write your own** under `src/test/java/org/kata/feedparser/` to drive your implementation, then:

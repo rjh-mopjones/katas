@@ -3,17 +3,17 @@
 > Build the value type every pricing, billing, and ledger system in this codebase would embed — get `equals`/`hashCode`/`compareTo` wrong here and prices silently stop matching.
 
 ## The problem
-Implement an immutable `Money` value type wrapping a `BigDecimal` amount and a currency code. Two amounts that a human would call identical — `2.0` and `2.00` — must behave identically everywhere: as `equals`, as a `HashMap` key, in a `HashSet`, and under `compareTo`. Arithmetic only makes sense between amounts in the same currency.
+Implement an immutable `Money` value type wrapping a decimal amount and a currency code. Two amounts that a human would call identical — `2.0` and `2.00` — must behave identically everywhere: as equality, as a hash-map key, in a hash-set, and under ordering. Arithmetic only makes sense between amounts in the same currency.
 
 ## Requirements
-- `Money(BigDecimal amount, String currency)` and `static Money of(String amount, String currency)`; reject a null amount or currency.
-- `Money plus(Money other)`, `Money minus(Money other)`, `Money times(BigDecimal factor)` — `plus`/`minus` require the same currency and throw `IllegalArgumentException` otherwise.
-- `BigDecimal amount()`, `String currency()`.
-- `boolean equals(Object)`, `int hashCode()`, and `implements Comparable<Money>` with `int compareTo(Money)`.
+- Creating a value from a decimal amount and a currency code, or from a decimal-formatted string and a currency code; both reject a null amount or currency.
+- Adding, subtracting, and multiplying by a scalar factor are supported; adding or subtracting values in different currencies throws `IllegalArgumentException`.
+- The amount and currency are both readable back out.
+- Equality, hashing, and ordering are all supported, and two amounts that are numerically equal but differently scaled (`2.0` vs `2.00`) must compare and hash as equal.
 - Fully immutable: no setters, no mutable state exposed.
 
-## What you implement
-Implement `Money` from scratch — the public API is the two constructors, `plus`/`minus`/`times`, `amount()`/`currency()`, and the `equals`/`hashCode`/`compareTo` trio. You decide how the amount is stored and normalised internally.
+## What you're given
+Nothing but the problem — you design the whole API and implementation from scratch.
 
 ## Run
 

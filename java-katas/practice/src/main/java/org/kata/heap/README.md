@@ -3,19 +3,19 @@
 > Build the array-backed priority queue behind `java.util.PriorityQueue` — the structure under Dijkstra's shortest path, task schedulers, and streaming top-k.
 
 ## The problem
-Implement a binary min-heap: a complete binary tree stored in a flat array (no node objects, no pointers) that keeps the smallest element (or, under a custom comparator, whichever element is "least" by that ordering) always at the root, retrievable in O(1) and removable in O(log n).
+Implement a binary min-heap: a priority queue that keeps the smallest element (or, under a custom comparator, whichever element is "least" by that ordering) always at the root, retrievable in O(1) and removable in O(log n).
 
 ## Requirements
-- `BinaryHeap()` — natural ordering; elements must be `Comparable`.
-- `BinaryHeap(Comparator<? super E> cmp)` — ordering supplied by the caller.
-- `void add(E e)` — insert, restoring the heap invariant.
-- `E peek()` — the root element without removing it, or `null` if empty.
-- `E poll()` — remove and return the root, or `null` if empty.
-- `int size()`, `boolean isEmpty()`.
-- Optional: `BinaryHeap(Collection<? extends E> items, Comparator<? super E> cmp)` building the heap in O(n) (heapify) rather than n sequential inserts.
+- Support construction with natural ordering (elements must be `Comparable`) and construction with a caller-supplied comparator.
+- Inserting an element restores the heap invariant.
+- Reading the least element without removing it yields that element, or nothing when the heap is empty.
+- Removing the least element returns it, or nothing when the heap is empty.
+- Expose the current element count and an emptiness check.
+- Preserve the complexity guarantees: O(1) to read the least element, O(log n) to insert or remove.
+- Optional: a bulk constructor that builds the heap from an existing collection in O(n) (heapify) rather than n sequential inserts.
 
-## What you implement
-Implement `BinaryHeap<E>` from scratch — the public API above is all you get; you own the backing storage, the sift-up/sift-down mechanics, and how the default (no-arg) constructor derives an ordering from `Comparable` without changing the class's type bound.
+## What you're given
+Nothing but the problem — you design the whole API and implementation from scratch.
 
 ## Run
 

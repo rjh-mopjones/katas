@@ -6,15 +6,16 @@
 Implement a generic queue with a fixed maximum capacity, backed by a single array. Producers offer elements until the buffer is full; consumers poll elements in the order they arrived. The buffer never grows and never allocates per element after construction — a full offer simply fails.
 
 ## Requirements
-- `RingBuffer(int capacity)` — capacity must be positive.
-- `offer(E e)` returns `false` (and changes nothing) if the buffer is full.
-- `poll()` removes and returns the head element, or `null` if empty.
-- `peek()` returns the head element without removing it, or `null` if empty.
-- `size()`, `isEmpty()`, `isFull()`, `capacity()` report current state.
-- No per-element allocation after construction — a single fixed-size backing array.
+- Constructing the buffer requires a positive capacity.
+- Offering an element when the buffer is full fails and leaves the buffer unchanged.
+- Removing the head element returns it and advances past it, or signals empty (rather than throwing) when there's nothing to remove.
+- Peeking returns the head element without removing it, or signals empty when there's nothing there.
+- Current size, and whether the buffer is empty or full, must all be queryable in O(1).
+- Capacity is fixed at construction and must be queryable.
+- No per-element allocation after construction — a single fixed-size backing array only.
 
-## What you implement
-Implement `RingBuffer<E>` from scratch — the public API is the constructor plus `offer`, `poll`, `peek`, `size`, `isEmpty`, `isFull`, and `capacity`. You design the internal cursor arithmetic and the full/empty disambiguation yourself.
+## What you're given
+Nothing but the problem — you design the whole API and implementation from scratch.
 
 ## Run
 

@@ -3,17 +3,17 @@
 > Guarantee exactly-once execution per idempotency key even when duplicate messages arrive concurrently — the core of safe payment and Kafka consumer dedup.
 
 ## The problem
-Implement a processor that wraps arbitrary `Supplier<T>` actions so that each unique idempotency key triggers the action exactly once, no matter how many times `process()` is called with that key. Concurrent duplicate deliveries of the same key must race safely: exactly one thread executes the action, all others return the cached result.
+Implement a processor that wraps arbitrary actions so that each unique idempotency key triggers the action exactly once, no matter how many times it is invoked with that key. Concurrent duplicate deliveries of the same key must race safely: exactly one thread executes the action, all others return the cached result.
 
 ## Requirements
-- `process(String idempotencyKey, Supplier<T> action)` executes `action.get()` on the first call for a key, caches the result, and returns it. On all subsequent calls for the same key it returns the cached result without invoking `action`.
-- Under concurrent duplicate delivery (multiple threads calling `process` with the same key simultaneously), the action runs exactly once per key.
-- `action` must not return `null` — `ConcurrentHashMap` cannot store null values, and null would be misinterpreted as an absent key, causing the action to re-run.
-- `isProcessed(String key)` returns `true` if the key has already been processed (point-in-time snapshot).
-- Null `idempotencyKey` or `action` arguments are rejected.
+- Processing a key for the first time executes the action, caches the result, and returns it. Processing the same key again returns the cached result without invoking the action again.
+- Under concurrent duplicate delivery (multiple threads processing the same key simultaneously), the action runs exactly once per key.
+- The wrapped action must not return null — a null result cannot be distinguished from "not yet processed", which would let the action re-run on a later call for the same key.
+- Checking whether a key has already been processed returns a point-in-time snapshot: true once that key's action has completed and been cached.
+- A null key or a null action is rejected.
 
-## What you implement
-Implement `IdempotentProcessor` from scratch — the public API is `process(String idempotencyKey, Supplier<T> action)` and `isProcessed(String idempotencyKey)`. You design the cache structure and the atomic exactly-once guarantee yourself.
+## What you're given
+Nothing but the problem — you design the whole API and implementation from scratch.
 
 ## Run
 

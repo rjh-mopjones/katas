@@ -40,11 +40,18 @@ Rules that hold across languages:
   mvn test                   # everything
   ```
 - **Package root:** `org.kata.<kata>`.
-- **Two READMEs per kata (java-katas standard):** `practice/.../README.md` is the **spoiler-free prompt**
-  (problem · requirements · what-you-implement API · run) — it must NOT reveal the data structures,
-  locking, or algorithm. `solution/.../README.md` is the **answer key** (Approach · The real challenge ·
-  Common mistakes & senior signal · Extensions · Reference) — read after attempting. The design hints
-  live only in the solution README + the code Javadoc, never in the prompt.
+- **Implement-from-scratch (java-katas standard):** the practice side reveals NEITHER the internal design
+  NOR the public API — the learner designs the whole thing.
+  - **Practice skeleton is a bare class** (supersedes the generic "public API surface" rule above for
+    java-katas): `package` + the class/interface declaration (visibility, `final`, name, generic params) +
+    a single `// Design the public API and implement it from scratch.` comment. No method signatures, no
+    fields, no imports, no `implements`/`extends`. `mvn -pl practice test-compile` still passes (an empty
+    class compiles). Fixtures/domain types (records/enums/interfaces/exceptions) are still copied verbatim.
+  - **Two READMEs.** `practice/.../README.md` is the **spoiler-free prompt** — `# Title` · `> scenario` ·
+    `## The problem` · `## Requirements` (behavioural contract, NO typed method signatures) ·
+    `## What you're given` (the provided fixtures only) · `## Run`. `solution/.../README.md` is the
+    **answer key** (Approach · The real challenge · Common mistakes & senior signal · Extensions · Reference).
+    The API design, data structures, locking, and algorithm live ONLY in the solution README + code Javadoc.
 - **Tests** (the reference suite in `solution/`, and ones you write in `practice/`): JUnit Jupiter
   5.11.3 ONLY — no Mockito, no AssertJ. Use `org.junit.jupiter.api.Test` + `Assertions.*`.
   Descriptive `snake_case` names. Concurrency tests use a `CountDownLatch` gate + done with
@@ -64,17 +71,16 @@ Rules that hold across languages:
 3. `mvn -pl solution test` → green.
 4. Mirror into **`practice/`** (no tests):
    - copy the fixture/domain types (interfaces, records, enums, exceptions) verbatim;
-   - for each SUT class, write a **bare skeleton**: `package` + existing `import`s + the class
-     declaration + every non-`private` constructor/method signature with body
-     `throw new UnsupportedOperationException();`. Delete Javadoc, fields, private methods, and
-     private nested types (keep a public nested type only if a kept signature needs it).
-5. Add the **two READMEs** (spoiler-free prompt vs answer key — see below):
+   - for each SUT class, write a **bare skeleton** — just `package` + the class/interface declaration
+     (visibility, `final`, name, generic params) + `// Design the public API and implement it from scratch.`.
+     No signatures, fields, imports, or `implements`/`extends` (the learner designs the entire API).
+5. Add the **two READMEs** (spoiler-free prompt vs answer key):
    - `practice/src/main/java/org/kata/<name>/README.md` = the **prompt** an interviewer would hand you:
-     `# Title` · `> scenario` · `## The problem` · `## Requirements` (the contract) ·
-     `## What you implement` (public API only) · `## Run` (write your own tests). **No design hints.**
+     `# Title` · `> scenario` · `## The problem` · `## Requirements` (behavioural contract, NO typed
+     signatures) · `## What you're given` (provided fixtures only) · `## Run`. No API, no design hints.
    - `solution/src/main/java/org/kata/<name>/README.md` = the **answer key** (read after attempting):
      `## Approach` · `## The real challenge` · `## Common mistakes & senior signal` · `## Extensions` ·
-     `## Reference` (primer pointer). This is where the data-structure / locking / algorithm hints live.
+     `## Reference` (primer pointer). This is where the API design + data-structure/locking/algorithm hints live.
 6. Verify: `mvn -pl practice test-compile` succeeds (the skeletons + fixtures compile).
 
 ---

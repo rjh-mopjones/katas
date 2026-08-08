@@ -3,18 +3,19 @@
 > Build a small fluent transformation pipeline whose public API is a working demonstration of PECS — the same bounded-wildcard reasoning behind `Collections.copy` and `Stream.map`.
 
 ## The problem
-Implement a generic `Pipeline<T>` that batches elements, transforms them, and drains them elsewhere. The twist is the signatures: each method must accept the *widest* type the operation can safely support — a producer collection should accept any subtype of `T`, a consumer collection should accept any supertype of `T` — so callers can build against a real type hierarchy instead of exact-type matches everywhere.
+Implement a generic pipeline over an element type `T` that batches elements, transforms them, and drains them elsewhere. The twist is the signatures: each operation must accept the *widest* type it can safely support — a producer collection should accept any subtype of the element type, a consumer collection should accept any supertype of it — so callers can build against a real type hierarchy instead of exact-type matches everywhere.
 
 ## Requirements
-- `static <T> Pipeline<T> create()` — an empty pipeline of element type `T`.
-- `Pipeline<T> addAll(Collection<? extends T> items)` — append every element of `items`; return `this` for chaining.
-- `<R> Pipeline<R> map(Function<? super T, ? extends R> fn)` — apply `fn` to every element, returning a **new** pipeline of the mapped type; the receiver is left untouched.
-- `void drainTo(Collection<? super T> sink)` — move every element into `sink`, leaving this pipeline empty.
-- `List<T> toList()` — a defensive-copy snapshot of the current elements, in order.
-- `static <T> void copy(List<? super T> dst, List<? extends T> src)` — append every element of `src` onto `dst` (no instance involved).
+- An empty pipeline can be created for any element type.
+- Bulk-adding elements accepts a producer collection of that element type *or any of its subtypes*, and returns the pipeline itself so calls can chain.
+- Mapping applies a transform to every element and returns a **new** pipeline of the mapped type, leaving the original untouched; the transform function itself should accept any supertype of the element type and may produce any subtype of the target type.
+- Draining moves every element into a consumer collection that accepts the element type *or any of its supertypes*, leaving the pipeline empty afterwards.
+- Taking a snapshot of the current elements returns a defensive copy, in order.
+- A standalone copy operation appends every element of one list onto another, following the same producer/consumer variance direction as above, with no pipeline instance involved.
+- Getting the variance direction backwards anywhere (producer vs. consumer) should be a compile error, not a runtime one — this is the actual point of the exercise.
 
-## What you implement
-Implement `Pipeline<T>` from scratch — the public API is the static `create()`/`copy()` factories plus `addAll`, `map`, `drainTo`, and `toList`. You choose the internal storage and how `map` builds the new pipeline; the wildcard bounds on every signature above must stay exactly as given — get one direction wrong (e.g. `Collection<T>` instead of `Collection<? extends T>`) and the covariance/contravariance tests below won't even compile.
+## What you're given
+Nothing but the problem — you design the whole API and implementation from scratch.
 
 ## Run
 

@@ -11,14 +11,14 @@ Implement a limit order book for a single trading symbol. Incoming orders are ma
 - Trades execute at the **resting** order's price, not the aggressor's (price improvement).
 - An aggressor that is not fully consumed after matching rests the unfilled residual at its limit price.
 - Partial fills of resting orders preserve time priority: the partially filled order stays at the head of its price-level queue with reduced quantity.
-- `cancel(orderId)` returns `true` if the order was open and removed, `false` if already filled, cancelled, or unknown.
-- Empty price levels must be removed from the book immediately after they drain, so `bestBid()` and `bestAsk()` never return a phantom level.
+- Cancelling an order reports whether it was open and got removed; it reports no-op for an order that's already filled, cancelled, or unknown.
+- Empty price levels must be removed from the book immediately after they drain, so queries for the best bid and best ask never return a phantom level.
 - All operations are serialised on a single lock (the matching loop is inherently sequential).
 
-## What you implement
-Implement `OrderBook` from scratch — the public API (`submit`, `cancel`, `bestBid`, `bestAsk`). You design the internal data structures (bid/ask books, price-level queues, id index), the matching loop, the rest helper, and the locking strategy yourself.
+## What you're given
+`Order` record, `Trade` record, and `Side` enum are provided as fully working scaffolding.
 
-(`Order` record, `Trade` record, and `Side` enum are provided as fully working scaffolding.)
+You design the entire public API — method names, parameters, return types — and the internals from scratch.
 
 ## Run
 

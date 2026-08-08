@@ -6,14 +6,23 @@
 Observations for many keys (selections, symbols, whatever the feed carries) arrive continuously, each nudging that key's cumulative score up or down. At any moment, a caller wants the current top K keys by score — highest first, deterministically ordered — without you re-scanning every key on every read.
 
 ## Requirements
-- `TopK(int k)` — `k` must be non-negative; `k == 0` is legal and `top()` is then always empty. Reject a negative `k` with `IllegalArgumentException`.
-- `add(String key, long weight)` adds `weight` to the key's cumulative score. `weight` may be negative — a key can fall as well as rise. A key is tracked from its first observation.
-- `increment(String key)` is shorthand for `add(key, 1)`.
-- `top()` returns up to `k` entries, highest score first, ties broken by key ascending (lexicographic) — deterministic regardless of arrival order. Fewer than `k` entries come back when fewer distinct keys exist; empty when `k == 0` or nothing has been added.
-- `scoreOf(String key)` returns the key's current cumulative score, or `0` if it has never been observed.
+- Constructing the structure takes a maximum size `k`, which must be non-negative; a `k` of zero
+  is legal, and the top entries are then always empty. A negative `k` is rejected with
+  `IllegalArgumentException`.
+- Adding a weighted observation for a key adds that weight to the key's cumulative score; the
+  weight may be negative, so a key's score can fall as well as rise. A key is tracked from its
+  first observation.
+- There is a shorthand for adding an observation of weight one to a key.
+- Querying the top entries returns up to `k` of them, highest score first, with ties broken by key
+  in ascending (lexicographic) order — deterministic regardless of arrival order. Fewer than `k`
+  entries come back when fewer distinct keys exist; the result is empty when `k` is zero or nothing
+  has been added yet.
+- Looking up a key's current cumulative score returns `0` if it has never been observed.
 
-## What you implement
-Implement `TopK` from scratch — the public API is the constructor plus `add(String, long)`, `increment(String)`, `top()`, and `scoreOf(String)`. `Entry` (the `record` returned by `top()`) is already provided. You design the internal ranking structure yourself.
+## What you're given
+- `Entry` — a record pairing a key with its cumulative score, as returned when querying the top entries.
+
+You design the entire public API — method names, parameters, return types — and the internals from scratch.
 
 ## Run
 

@@ -1,36 +1,5 @@
 package org.kata.bank;
 
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
-
-public class ConcurrentAccountService implements AccountService {
-
-    @Override
-    public Account open(BigDecimal openingBalance) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Optional<Account> find(UUID accountId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Optional<Account> deposit(UUID accountId, BigDecimal amount) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Optional<Account> withdraw(UUID accountId, BigDecimal amount) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean transfer(UUID from, UUID to, BigDecimal amount) {
-        throw new UnsupportedOperationException();
-    }
+public class ConcurrentAccountService {
+    // Design the public API and implement it from scratch.
 }

@@ -8,20 +8,17 @@ bucket array, the collision strategy, and the resize/rehash mechanics — the me
 "how does `HashMap` work" interview question eventually gets to.
 
 ## Requirements
-- `MyHashMap()` and `MyHashMap(int initialCapacity)`.
-- `V put(K key, V value)` — inserts or overwrites, returns the previous value or `null`.
-- `V get(K key)` — returns the value, or `null` if absent.
-- `V remove(K key)` — removes and returns the value, or `null` if absent.
-- `int size()`.
-- `boolean containsKey(K key)`.
+- Store key→value pairs; inserting a key that already exists overwrites it and yields the previous value.
+- Look a value up by its key; an absent key reports "not present".
+- Remove a key, yielding whatever value it held.
+- Report how many entries are held, and whether a given key is present.
 - A `null` key must be supported (it lives in one well-defined bucket, not rejected).
-- Growth: once a load factor of `0.75` is exceeded, the table must resize (double) and rehash every
-  entry — capacity never grows unbounded per `put`, and no entry is ever lost across a resize.
+- Once a load factor of `0.75` is exceeded, the table resizes (doubles) and rehashes every entry —
+  capacity never grows unbounded per insert, and no entry is ever lost across a resize.
 
-## What you implement
-Implement `MyHashMap<K, V>` from scratch: the two constructors, `put`, `get`, `remove`, `size`,
-`containsKey`. You design the bucket array, the collision strategy, the hash-to-index mapping, and the
-resize/rehash mechanics yourself.
+## What you're given
+Nothing but the problem. You design the entire public API — method names, parameters, return types —
+and the internals (bucket array, collision strategy, hash-to-index mapping, resize/rehash) from scratch.
 
 ## Run
 

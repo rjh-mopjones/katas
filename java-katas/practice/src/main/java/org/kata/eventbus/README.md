@@ -3,19 +3,21 @@
 > Build a type-keyed synchronous pub/sub bus that stays correct while handlers subscribe, publish, and unsubscribe concurrently.
 
 ## The problem
-Implement an in-process event bus where subscribers register interest in a specific event type and receive all future events of that exact runtime type. Publishers fire an event without knowing who is listening. The bus must deliver to all registered handlers, isolate handler exceptions so one failure cannot silently block others, and return a cancellable `Subscription` token.
+Implement an in-process event bus where subscribers register interest in a specific event type and receive all future events of that exact runtime type. Publishers fire an event without knowing who is listening. The bus must deliver to all registered handlers, isolate handler exceptions so one failure cannot silently block others, and hand back a cancellable subscription token.
 
 ## Requirements
-- `subscribe(Class<T> type, Consumer<T> handler)` registers the handler and returns a `Subscription`.
-- `Subscription.unsubscribe()` removes exactly that registration; calling it multiple times is a no-op.
-- `publish(Object event)` dispatches to all handlers registered for `event.getClass()` (exact runtime type — not superclasses or interfaces). If no handlers are registered, publish is a silent no-op.
+- Subscribing registers a handler for a given event type and yields a `Subscription` token the caller can later cancel.
+- Cancelling a subscription removes exactly that registration; cancelling again is a no-op.
+- Publishing an event dispatches it to every handler registered for the event's exact runtime type (not superclasses or interfaces). If no handlers are registered, publishing is a silent no-op.
 - Handlers are invoked in registration order (FIFO).
 - If a handler throws, the exception is suppressed and the remaining handlers still receive the event.
-- The bus must be safe under concurrent publish calls and concurrent subscribe/unsubscribe during publish — no `ConcurrentModificationException` and no missed or duplicate deliveries.
-- Null `type`, `handler`, and `event` arguments are rejected.
+- The bus must be safe under concurrent publishes and concurrent subscribe/unsubscribe during a publish — no `ConcurrentModificationException` and no missed or duplicate deliveries.
+- Null type, handler, and event arguments are rejected.
 
-## What you implement
-Implement `EventBus` from scratch — the public API is `subscribe(Class<T>, Consumer<T>)` (returns a `Subscription`) and `publish(Object)`. You design the internal handler registry, unsubscribe mechanism, and concurrent iteration strategy yourself. The `Subscription` interface (with its single `unsubscribe()` method) is provided as a working type.
+## What you're given
+- `Subscription` — an interface with a single `unsubscribe()` method, the cancellable token your bus hands back on subscribe.
+
+You design the entire public API — method names, parameters, return types — and the internals from scratch.
 
 ## Run
 

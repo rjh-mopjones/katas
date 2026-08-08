@@ -6,16 +6,16 @@
 Implement a cache of live quotes where every entry expires a fixed duration after it was *written*. This is a different eviction policy from an LRU or LFU cache: there is no capacity bound and no notion of "recently used" — an entry disappears purely because time passed, regardless of how often (or rarely) it was read. A quote nobody has touched for a while and a quote read a thousand times a second go stale at exactly the same instant.
 
 ## Requirements
-- `QuoteCache(long ttlNanos)` uses the system nanosecond clock.
-- `QuoteCache(long ttlNanos, LongSupplier clock)` takes an injected clock (nanos); `ttlNanos` must be positive.
-- `put(K key, V value)` stores or overwrites an entry, stamping the current time. Overwriting an existing key **resets** its TTL.
-- `get(K key)` returns the value if present and not expired, else `Optional.empty()`. An expired entry must be removed as a side effect of this call (lazy purge).
-- `size()` returns the number of currently **live** entries — expired entries must not be counted, and must be purged lazily as they're discovered.
-- `containsKey(K key)` returns true iff a live entry exists for that key.
+- The cache can be built with the system nanosecond clock, or with an injected nanosecond clock for testing; the TTL must be positive.
+- Storing a value for a key that already exists overwrites it and resets its expiry — the clock restarts from the moment of the overwrite.
+- Reading a key returns the value only while it's still live; once expired it behaves as absent. Reading an expired entry must also purge it as a side effect (lazy purge, not a background sweep).
+- The count of currently live entries must never include expired ones — expired entries are discovered and purged lazily, not on a timer.
+- Checking whether a key exists follows the same liveness rule as reading it.
 - Expiry boundary: an entry stored at time `t` is expired at query time `now` iff `now - t >= ttlNanos` — age exactly equal to the TTL counts as expired, not "just barely fresh."
+- All operations must be safe under concurrent access from multiple threads, without relying on external locking by the caller.
 
-## What you implement
-Implement `QuoteCache<K, V>` from scratch — the public API is two constructors (`ttlNanos` alone, and `ttlNanos` + injected `LongSupplier` clock), `put(K, V)`, `get(K)`, `size()`, and `containsKey(K)`. You design the internal storage and the expiry/purge mechanism yourself, and it must be safe under concurrent `put`/`get` from multiple threads without external locking.
+## What you're given
+Nothing but the problem — you design the whole API and implementation from scratch.
 
 ## Run
 

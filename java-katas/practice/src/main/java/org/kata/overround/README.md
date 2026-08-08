@@ -13,20 +13,19 @@ probabilities that sum back to `1.0`.
 
 ## Requirements
 
-- `bookSum(decimalOdds)` — `Σ (1/oddsᵢ)`, the raw book total.
-- `overround(decimalOdds)` — `bookSum − 1`, the margin (e.g. `0.05` = 5%).
-- `fairProbabilities(decimalOdds, method)` — de-vigged probabilities summing to `1` (within a small
-  epsilon), computed by one of three `Method`s: `PROPORTIONAL`, `ADDITIVE`, `POWER`.
-- `fairOdds(decimalOdds, method)` — `1/pᵢ` from the fair probabilities.
+- Summing the reciprocal of every price in the market gives the raw book total (`Σ 1/oddsᵢ`).
+- The margin is that book total minus `1` (e.g. `0.05` = 5%).
+- Recovering fair, de-vigged probabilities that sum back to `1` (within a small epsilon) must
+  support three distinct methods: `PROPORTIONAL`, `ADDITIVE`, `POWER`.
+- Fair odds are recovered as `1` divided by each fair probability.
 - Any odds `<= 1`, or an empty list, throws `IllegalArgumentException`.
 - Works for 2-way (moneyline) and N-way (e.g. race, match-result) markets alike.
 
-## What you implement
+## What you're given
 
-Implement `Overround` from scratch — the public API is `bookSum`, `overround`,
-`fairProbabilities(List<BigDecimal>, Method)`, and `fairOdds(List<BigDecimal>, Method)`. The
-`Method` enum (`PROPORTIONAL`, `ADDITIVE`, `POWER`) is provided as a fixture. You design the
-internal arithmetic, rounding, and the `POWER` root-find yourself.
+The `Method` enum (`PROPORTIONAL`, `ADDITIVE`, `POWER`) is provided as a fixture.
+
+You design the entire public API — method names, parameters, return types — and the internals from scratch.
 
 ## Run
 

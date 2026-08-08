@@ -6,16 +6,16 @@
 Implement a `TaskScheduler` that accepts one-shot `Runnable` tasks with a delay and executes them on a single background worker thread when their time is due. The scheduler must order tasks by due time, sleep efficiently (no busy-waiting or polling loops), support pre-run cancellation, and shut down cleanly when closed.
 
 ## Requirements
-- `start()` launches the worker thread; throws `IllegalStateException` if already started.
-- `schedule(Runnable action, long delay, TimeUnit unit)` enqueues a task and returns a `ScheduledTask` handle. Throws if the scheduler is not running, action is null, delay is negative, or unit is null.
-- `ScheduledTask.cancel()` marks the task cancelled; the worker skips it if cancellation happens before execution. Idempotent.
-- Tasks execute in due-time order; a newly scheduled task with a sooner due time should preempt the current wait.
+- Starting the scheduler launches the worker thread; starting one that's already running throws `IllegalStateException`.
+- Scheduling a task with a delay enqueues it and returns a handle representing that scheduled task. Scheduling throws if the scheduler is not running, the action is null, the delay is negative, or the time unit is null.
+- Cancelling a scheduled task (via its handle) marks it cancelled; the worker skips it if cancellation happens before execution. Cancelling is idempotent.
+- Tasks execute in due-time order; a newly scheduled task with a sooner due time should preempt the worker's current wait.
 - The worker thread must not busy-wait — it must block until the next task is due.
-- `close()` (AutoCloseable) interrupts the worker, waits up to 1 second for it to exit, and prevents further scheduling.
-- If a task action throws, the exception is swallowed so the worker continues draining the queue.
+- Closing the scheduler (it is `AutoCloseable`) interrupts the worker, waits up to 1 second for it to exit, and prevents further scheduling.
+- If a task's action throws, the exception is swallowed so the worker continues draining the queue.
 
-## What you implement
-Implement `TaskScheduler` from scratch — the public API is `start()`, `schedule(Runnable, long, TimeUnit)` (returns a `ScheduledTask`), and `close()`. You also implement the inner `ScheduledTask` type with `cancel()`, `isCancelled()`, `getDelay(TimeUnit)`, and `compareTo(Delayed)`. You design the worker thread, `DelayQueue` usage, and shutdown logic yourself.
+## What you're given
+Nothing but the problem — you design the whole API and implementation from scratch.
 
 ## Run
 
